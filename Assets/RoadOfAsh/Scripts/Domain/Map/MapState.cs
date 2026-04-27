@@ -1,0 +1,34 @@
+using System.Collections.Generic;
+
+namespace RoadOfAsh.Scripts.Domain.Map
+{
+    public class MapState
+    {
+        public List<MapNodeData> Nodes { get; } = new();
+        public HashSet<int> CompletedNodeIds { get; } = new();
+
+        public int CurrentNodeId { get; private set; }
+        public int SelectedNodeId { get; private set; } = -1;
+
+        public MapState(List<MapNodeData> nodes, int startNodeId)
+        {
+            Nodes = nodes;
+            CurrentNodeId = startNodeId;
+        }
+
+        public void SelectNode(int nodeId)
+        {
+            SelectedNodeId = nodeId;
+        }
+
+        public void CompleteSelectedNode()
+        {
+            if (SelectedNodeId < 0)
+                return;
+
+            CompletedNodeIds.Add(SelectedNodeId);
+            CurrentNodeId = SelectedNodeId;
+            SelectedNodeId = -1;
+        }
+    }
+}

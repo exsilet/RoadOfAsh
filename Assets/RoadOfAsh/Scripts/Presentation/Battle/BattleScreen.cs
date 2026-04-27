@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Battle;
 using RoadOfAsh.Scripts.Domain.Cards;
+using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Infrastructure;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
@@ -36,26 +40,31 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private string enemyName = "Баба-Яга";
         [SerializeField] private int enemyHp = 40;
         [SerializeField] private int enemyDamage = 6;
+        
+        [Header("Scene Transition")]
+        [SerializeField] private Button continueButton;
+        [SerializeField] private string mapSceneName = "MapScene";
+        [SerializeField] private string battleSceneName = "BattleScene";
 
         private IBattleService _battleService;
         private ICardService _cardService;
         private PlayerState _playerState;
         private IObjectResolver _resolver;
+        private IMapService _mapService;
+        private RunState _runState;
 
         private Coroutine _finishRoutine;
         private Coroutine _cardResultRoutine;
 
         [Inject]
-        public void Construct(
-            IBattleService battleService,
-            ICardService cardService,
-            PlayerState playerState,
-            IObjectResolver resolver)
+        public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState)
         {
             _battleService = battleService;
             _cardService = cardService;
             _playerState = playerState;
             _resolver = resolver;
+            _mapService = mapService;
+            _runState = runState;
         }
 
         private void Start()
@@ -71,6 +80,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 Debug.LogError("BattleScreen: dependencies were not injected. Check GameLifetimeScope and VContainer registration.");
                 return;
             }
+            
+            if (continueButton != null)
+                continueButton.onClick.AddListener(OnContinueClicked);
 
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
@@ -110,6 +122,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (endTurnButton != null)
                 endTurnButton.onClick.RemoveListener(OnEndTurnClicked);
+            
+            if (continueButton != null)
+                continueButton.onClick.RemoveListener(OnContinueClicked);
 
             if (_battleService != null)
             {
@@ -175,7 +190,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private void RefreshStats()
         {
             if (playerHpText != null)
-                playerHpText.text = $"HP: {_playerState.HP}/{_playerState.MaxHP}";
+                playerHpText.text = $"{_playerState.HP}/{_playerState.MaxHP}";
 
             if (enemyHpText != null && _battleService.CurrentEnemy != null)
                 enemyHpText.text = $"HP: {_battleService.CurrentEnemy.HP}/{_battleService.CurrentEnemy.MaxHP}";
@@ -286,6 +301,29 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 StopCoroutine(coroutine);
                 coroutine = null;
             }
+        }
+        
+        private void OnContinueClicked()
+        {
+            if (_battleService == null || _runState == null)
+                return;
+
+            if (!_battleService.PlayerWon)
+            {
+                RunLifetimeScope.LoadScene(battleSceneName);
+                return;
+            }
+
+            if (_mapService != null && _mapService.State != null && _mapService.State.SelectedNodeId >= 0)
+            {
+                _mapService.CompleteSelectedNode();
+            }
+            else
+            {
+                _runState.IntroBattleCompleted = true;
+            }
+
+            RunLifetimeScope.LoadScene(mapSceneName);
         }
     }
 }
