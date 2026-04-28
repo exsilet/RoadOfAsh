@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Battle;
 using RoadOfAsh.Scripts.Domain.Cards;
@@ -8,7 +9,6 @@ using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Infrastructure;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
@@ -34,6 +34,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [Header("Card Result UI")]
         [SerializeField] private TMP_Text cardResultText;
         [SerializeField] private GameObject cardResultPanel;
+        [SerializeField] private HandLayoutController handLayoutController;
 
         [Header("Battle Config")]
         [SerializeField] private List<CardSO> startingDeck;
@@ -41,18 +42,28 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private int enemyHp = 40;
         [SerializeField] private int enemyDamage = 6;
         
+        [Header("Card Play Animation")]
+        [SerializeField] private RectTransform playTarget;
+        [SerializeField] private RectTransform discardTarget;
+        [SerializeField] private float playMoveDuration = 0.22f;
+        [SerializeField] private float discardMoveDuration = 0.28f;
+        [SerializeField] private float discardScale = 0.25f;
+        [SerializeField] private float discardStagger = 0.05f;
+        
         [Header("Scene Transition")]
         [SerializeField] private Button continueButton;
         [SerializeField] private string mapSceneName = "MapScene";
         [SerializeField] private string battleSceneName = "BattleScene";
 
+        private bool _isCardAnimating;
+        
         private IBattleService _battleService;
         private ICardService _cardService;
         private PlayerState _playerState;
         private IObjectResolver _resolver;
         private IMapService _mapService;
         private RunState _runState;
-
+        
         private Coroutine _finishRoutine;
         private Coroutine _cardResultRoutine;
 
@@ -135,7 +146,53 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void OnEndTurnClicked()
         {
+            if (_isCardAnimating)
+                return;
+
+            StartCoroutine(EndTurnRoutine());
+        }
+        
+        private IEnumerator EndTurnRoutine()
+        {
+            _isCardAnimating = true;
+
+            yield return DiscardVisibleHandRoutine();
+
             _battleService.EndPlayerTurn();
+
+            _isCardAnimating = false;
+
+            RefreshUI();
+        }
+        
+        private IEnumerator DiscardVisibleHandRoutine()
+        {
+            if (handRoot == null || discardTarget == null)
+                yield break;
+
+            int count = handRoot.childCount;
+
+            for (int i = count - 1; i >= 0; i--)
+            {
+                RectTransform cardRect = handRoot.GetChild(i) as RectTransform;
+                if (cardRect == null)
+                    continue;
+
+                cardRect.DOKill();
+                cardRect.SetAsLastSibling();
+
+                cardRect
+                    .DOMove(discardTarget.position, discardMoveDuration)
+                    .SetEase(Ease.InCubic)
+                    .SetDelay((count - 1 - i) * discardStagger);
+
+                cardRect
+                    .DOScale(Vector3.one * discardScale, discardMoveDuration)
+                    .SetEase(Ease.InCubic)
+                    .SetDelay((count - 1 - i) * discardStagger);
+            }
+
+            yield return new WaitForSeconds(discardMoveDuration + count * discardStagger);
         }
 
         private void OnCardPlayed(CardSO card, PlayedCardResult result)
@@ -172,7 +229,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         public void RefreshUI()
         {
             RefreshStats();
-            RefreshHand();
+
+            if (!_isCardAnimating)
+                RefreshHand();
+
             RefreshButtons();
             HandleBattleFinishUI();
         }
@@ -207,18 +267,41 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (handRoot == null)
                 return;
 
-            ClearHand();
-
             IReadOnlyList<CardSO> hand = _cardService.Hand;
+
+            for (int i = handRoot.childCount - 1; i >= hand.Count; i--)
+            {
+                Transform child = handRoot.GetChild(i);
+
+                if (handLayoutController != null && child is RectTransform rect)
+                    handLayoutController.ForgetCard(rect);
+
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+
             for (int i = 0; i < hand.Count; i++)
             {
                 CardSO card = hand[i];
                 if (card == null)
                     continue;
 
-                var cardView = _resolver.Instantiate(cardPrefab, handRoot);
-                cardView.Setup(card, false);
+                CardView cardView;
+
+                if (i < handRoot.childCount)
+                {
+                    cardView = handRoot.GetChild(i).GetComponent<CardView>();
+                }
+                else
+                {
+                    cardView = _resolver.Instantiate(cardPrefab, handRoot);
+                }
+
+                cardView.Setup(card, false, OnCardViewClicked);
             }
+
+            if (handLayoutController != null)
+                handLayoutController.Rebuild();
         }
 
         private void RefreshButtons()
@@ -255,12 +338,98 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             _finishRoutine = null;
         }
+        
+        private void OnCardViewClicked(CardView cardView, CardSO card)
+        {
+            if (_isCardAnimating)
+                return;
+
+            if (_battleService == null || _battleService.IsBattleFinished)
+                return;
+
+            if (cardView == null || card == null)
+                return;
+
+            if (_playerState.Energy < card.Cost)
+            {
+                ShowNotEnoughEnergy(cardView);
+                return;
+            }
+
+            StartCoroutine(PlayCardWithDiscardAnimation(cardView, card));
+        }
+        
+        private void ShowNotEnoughEnergy(CardView cardView)
+        {
+            RectTransform rect = cardView.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.DOKill();
+                rect.DOShakeAnchorPos(0.25f, new Vector2(18f, 0f), 12, 90f);
+            }
+
+            if (cardResultPanel != null)
+                cardResultPanel.SetActive(true);
+
+            if (cardResultText != null)
+            {
+                cardResultText.color = new Color(1f, 0.35f, 0.35f, 1f);
+                cardResultText.text = "Недостаточно энергии";
+            }
+
+            StopCoroutineSafe(ref _cardResultRoutine);
+            _cardResultRoutine = StartCoroutine(HideCardResultRoutine());
+        }
+        
+        private IEnumerator PlayCardWithDiscardAnimation(CardView cardView, CardSO card)
+        {
+            _isCardAnimating = true;
+
+            RectTransform cardRect = cardView.GetComponent<RectTransform>();
+
+            if (cardRect != null && playTarget != null)
+            {
+                cardRect.DOKill();
+                cardRect.SetAsLastSibling();
+
+                yield return cardRect
+                    .DOMove(playTarget.position, playMoveDuration)
+                    .SetEase(Ease.OutCubic)
+                    .WaitForCompletion();
+            }
+
+            _battleService.TryPlayCard(card);
+
+            if (cardRect != null && discardTarget != null)
+            {
+                cardRect.DOKill();
+
+                Tween moveTween = cardRect
+                    .DOMove(discardTarget.position, discardMoveDuration)
+                    .SetEase(Ease.InCubic);
+
+                cardRect
+                    .DOScale(Vector3.one * discardScale, discardMoveDuration)
+                    .SetEase(Ease.InCubic);
+
+                yield return moveTween.WaitForCompletion();
+            }
+
+            _isCardAnimating = false;
+            
+            RefreshUI();
+        }
 
         private void ClearHand()
         {
+            if (handRoot == null)
+                return;
+
             for (int i = handRoot.childCount - 1; i >= 0; i--)
             {
-                Destroy(handRoot.GetChild(i).gameObject);
+                Transform child = handRoot.GetChild(i);
+                child.SetParent(null);
+                Destroy(child.gameObject);
             }
         }
 

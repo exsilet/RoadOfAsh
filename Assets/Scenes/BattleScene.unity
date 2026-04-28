@@ -438,8 +438,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4286879913
+  m_fontColor: {r: 0.6627451, g: 0.59607846, b: 0.5176471, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -651,6 +651,7 @@ GameObject:
   - component: {fileID: 338073360}
   - component: {fileID: 338073362}
   - component: {fileID: 338073361}
+  - component: {fileID: 338073363}
   m_Layer: 0
   m_Name: HandPanel
   m_TagString: Untagged
@@ -673,10 +674,10 @@ RectTransform:
   - {fileID: 2016357299}
   m_Father: {fileID: 471605458}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -111, y: -112}
-  m_SizeDelta: {x: 1217.729, y: 336}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -99, y: 189.44}
+  m_SizeDelta: {x: 1180, y: 336}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &338073361
 MonoBehaviour:
@@ -716,6 +717,35 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 338073359}
   m_CullTransparentMesh: 1
+--- !u!114 &338073363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338073359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bca1d10e3b8449fbebc18534fd6e403, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handRoot: {fileID: 2016357299}
+  minX: -500
+  maxX: 464
+  y: 0
+  cardWidth: 220
+  cardHeight: 320
+  normalSpacing: 12
+  minCenterDistance: 50
+  compactCount: 5
+  moveDuration: 0.25
+  appearDuration: 0.25
+  appearYOffset: -80
+  appearScale: 0.9
+  stagger: 0.025
+  useFanLayout: 1
+  maxRotation: 14
+  arcHeight: 45
 --- !u!1 &440070854
 GameObject:
   m_ObjectHideFlags: 0
@@ -828,6 +858,7 @@ RectTransform:
   - {fileID: 1875705806}
   - {fileID: 1629550358}
   - {fileID: 531223749}
+  - {fileID: 1542483831}
   m_Father: {fileID: 1540616360}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2255,8 +2286,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4286879913
+  m_fontColor: {r: 0.6627451, g: 0.59607846, b: 0.5176471, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3103,6 +3134,7 @@ MonoBehaviour:
   victoryDelay: 0.8
   cardResultText: {fileID: 1687958265}
   cardResultPanel: {fileID: 1293953737}
+  handLayoutController: {fileID: 338073363}
   startingDeck:
   - {fileID: 11400000, guid: 7f6774337477c8a46af4eb0d09323af2, type: 2}
   - {fileID: 11400000, guid: 29b04a1566fe21e4e829c2ac26635d31, type: 2}
@@ -3117,9 +3149,50 @@ MonoBehaviour:
   enemyName: "\u0411\u0430\u0431\u0430-\u042F\u0433\u0430"
   enemyHp: 40
   enemyDamage: 6
+  playTarget: {fileID: 1542483831}
+  discardTarget: {fileID: 1724681240}
+  playMoveDuration: 0.22
+  discardMoveDuration: 0.35
+  discardScale: 0.25
+  discardStagger: 0.05
   continueButton: {fileID: 887291496}
   mapSceneName: MapScene
   battleSceneName: BattleScene
+--- !u!1 &1542483830
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1542483831}
+  m_Layer: 0
+  m_Name: PlayTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1542483831
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1542483830}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 471605458}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: 239}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1629550357
 GameObject:
   m_ObjectHideFlags: 0
@@ -3174,7 +3247,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0.41509432, g: 0.20950516, b: 0.20950516, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4229,8 +4302,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2016357299}
-  - component: {fileID: 2016357301}
-  - component: {fileID: 2016357300}
   m_Layer: 0
   m_Name: HandRoot
   m_TagString: Untagged
@@ -4252,51 +4323,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 338073360}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.02, y: 0.02}
-  m_AnchorMax: {x: 0.98, y: 0.82}
-  m_AnchoredPosition: {x: 0, y: 28.25}
-  m_SizeDelta: {x: 0, y: -31.5}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1180, y: 255.418}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2016357300
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2016357298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 0
---- !u!114 &2016357301
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2016357298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 10
-    m_Right: 10
-    m_Top: 10
-    m_Bottom: 10
-  m_ChildAlignment: 4
-  m_Spacing: 0.2
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1 &2074334727
 GameObject:
   m_ObjectHideFlags: 0
@@ -5040,8 +5071,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4286879913
+  m_fontColor: {r: 0.6627451, g: 0.59607846, b: 0.5176471, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -5220,7 +5251,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.8}
   m_AnchorMax: {x: 0.5, y: 0.8}
-  m_AnchoredPosition: {x: -0.0000047684, y: -1.4493027}
+  m_AnchoredPosition: {x: -0.0000047684, y: -1.4493103}
   m_SizeDelta: {x: 256.576, y: 60.865}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2134122251

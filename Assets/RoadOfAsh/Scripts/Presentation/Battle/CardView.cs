@@ -1,3 +1,4 @@
+using System;
 using RoadOfAsh.Scripts.Domain.Battle;
 using TMPro;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private Sprite powerBaseSprite;
         [SerializeField] private Sprite curseBaseSprite;
 
+        private Action<CardView, CardSO> _onClicked;
         private CardSO _card;
         private IBattleService _battleService;
 
@@ -35,9 +37,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             _battleService = battleService;
         }
 
-        public void Setup(CardSO card, bool isCorrupted = false)
+        public void Setup(CardSO card, bool isCorrupted = false, Action<CardView, CardSO> onClicked = null)
         {
             _card = card;
+            _onClicked = onClicked;
 
             if (titleText != null) titleText.text = card.CardName;
             if (costText != null) costText.text = card.Cost.ToString();
@@ -77,15 +80,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void OnClick()
         {
-            Debug.Log($"Card clicked: {_card?.CardName}, battleService={_battleService}");
-
-            if (_card == null || _battleService == null)
+            if (_card == null)
                 return;
 
-            if (_battleService.IsBattleFinished)
-                return;
-
-            _battleService.TryPlayCard(_card);
+            _onClicked?.Invoke(this, _card);
         }
 
         private string GetTypeLabel(CardType type)
