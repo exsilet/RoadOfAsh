@@ -5,6 +5,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Card_", menuName = "Deckbuilder/Card")]
 public class CardSO : ScriptableObject
 {
+    [SerializeField] private CardRarity rarity = CardRarity.Common;
+    
     public string Id;
     public string CardName;
 
@@ -12,6 +14,8 @@ public class CardSO : ScriptableObject
     [TextArea] public string FlavorText;
 
     public CardType Type;
+    public CardRarity Rarity => rarity;
+    
     public int Cost;
 
     public List<CardEffect> Effects = new();

@@ -6,6 +6,7 @@ using RoadOfAsh.Scripts.Domain.Battle;
 using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Infrastructure;
 using TMPro;
 using UnityEngine;
@@ -36,12 +37,20 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private GameObject cardResultPanel;
         [SerializeField] private HandLayoutController handLayoutController;
 
+        [Header("Reward UI")]
+        [SerializeField] private GameObject rewardPanel;
+        [SerializeField] private Transform rewardCardsRoot;
+        [SerializeField] private RewardCardView rewardCardPrefab;
+        [SerializeField] private Button skipRewardButton;
+        [SerializeField] private List<CardSO> rewardPool;
+        [SerializeField] private int rewardCardsCount = 3;
+
         [Header("Battle Config")]
         [SerializeField] private List<CardSO> startingDeck;
         [SerializeField] private string enemyName = "Баба-Яга";
         [SerializeField] private int enemyHp = 40;
         [SerializeField] private int enemyDamage = 6;
-        
+
         [Header("Card Play Animation")]
         [SerializeField] private RectTransform playTarget;
         [SerializeField] private RectTransform discardTarget;
@@ -49,26 +58,35 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private float discardMoveDuration = 0.28f;
         [SerializeField] private float discardScale = 0.25f;
         [SerializeField] private float discardStagger = 0.05f;
-        
+
         [Header("Scene Transition")]
         [SerializeField] private Button continueButton;
         [SerializeField] private string mapSceneName = "MapScene";
         [SerializeField] private string battleSceneName = "BattleScene";
 
         private bool _isCardAnimating;
-        
+        private bool _rewardShown;
+
         private IBattleService _battleService;
         private ICardService _cardService;
         private PlayerState _playerState;
         private IObjectResolver _resolver;
         private IMapService _mapService;
         private RunState _runState;
-        
+        private RewardService _rewardService;
+
         private Coroutine _finishRoutine;
         private Coroutine _cardResultRoutine;
 
         [Inject]
-        public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState)
+        public void Construct(
+            IBattleService battleService,
+            ICardService cardService,
+            PlayerState playerState,
+            IObjectResolver resolver,
+            IMapService mapService,
+            RunState runState,
+            RewardService rewardService)
         {
             _battleService = battleService;
             _cardService = cardService;
@@ -76,6 +94,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             _resolver = resolver;
             _mapService = mapService;
             _runState = runState;
+            _rewardService = rewardService;
         }
 
         private void Start()
@@ -83,23 +102,17 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (victoryPanel != null)
                 victoryPanel.SetActive(false);
 
+            if (rewardPanel != null)
+                rewardPanel.SetActive(false);
+
             if (cardResultPanel != null)
                 cardResultPanel.SetActive(false);
 
             if (_battleService == null || _cardService == null || _playerState == null || _resolver == null)
             {
-                Debug.LogError("BattleScreen: dependencies were not injected. Check GameLifetimeScope and VContainer registration.");
+                Debug.LogError("BattleScreen: dependencies were not injected.");
                 return;
             }
-            
-            if (continueButton != null)
-                continueButton.onClick.AddListener(OnContinueClicked);
-
-            if (endTurnButton != null)
-                endTurnButton.onClick.AddListener(OnEndTurnClicked);
-
-            _battleService.OnBattleStateChanged += RefreshUI;
-            _battleService.OnCardPlayed += OnCardPlayed;
 
             if (startingDeck == null || startingDeck.Count == 0)
             {
@@ -113,7 +126,30 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
             }
 
-            _cardService.InitializeDeck(startingDeck);
+            if (handRoot == null)
+            {
+                Debug.LogError("BattleScreen: handRoot is not assigned.");
+                return;
+            }
+
+            if (continueButton != null)
+                continueButton.onClick.AddListener(OnContinueClicked);
+
+            if (skipRewardButton != null)
+                skipRewardButton.onClick.AddListener(GoToMapAfterReward);
+
+            if (endTurnButton != null)
+                endTurnButton.onClick.AddListener(OnEndTurnClicked);
+
+            _battleService.OnBattleStateChanged += RefreshUI;
+            _battleService.OnCardPlayed += OnCardPlayed;
+
+            if (_playerState.Deck.Count == 0)
+                _playerState.Deck.AddRange(startingDeck);
+
+            // ВАЖНО: передаём копию, а не сам _playerState.Deck.
+            // Иначе CardService может очистить тот же список.
+            _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck));
 
             _battleService.StartBattle(new EnemyState
             {
@@ -133,9 +169,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (endTurnButton != null)
                 endTurnButton.onClick.RemoveListener(OnEndTurnClicked);
-            
+
             if (continueButton != null)
                 continueButton.onClick.RemoveListener(OnContinueClicked);
+
+            if (skipRewardButton != null)
+                skipRewardButton.onClick.RemoveListener(GoToMapAfterReward);
 
             if (_battleService != null)
             {
@@ -151,7 +190,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             StartCoroutine(EndTurnRoutine());
         }
-        
+
         private IEnumerator EndTurnRoutine()
         {
             _isCardAnimating = true;
@@ -164,7 +203,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             RefreshUI();
         }
-        
+
         private IEnumerator DiscardVisibleHandRoutine()
         {
             if (handRoot == null || discardTarget == null)
@@ -181,15 +220,15 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 cardRect.DOKill();
                 cardRect.SetAsLastSibling();
 
-                cardRect
-                    .DOMove(discardTarget.position, discardMoveDuration)
-                    .SetEase(Ease.InCubic)
-                    .SetDelay((count - 1 - i) * discardStagger);
+                float delay = (count - 1 - i) * discardStagger;
 
-                cardRect
-                    .DOScale(Vector3.one * discardScale, discardMoveDuration)
+                cardRect.DOMove(discardTarget.position, discardMoveDuration)
                     .SetEase(Ease.InCubic)
-                    .SetDelay((count - 1 - i) * discardStagger);
+                    .SetDelay(delay);
+
+                cardRect.DOScale(Vector3.one * discardScale, discardMoveDuration)
+                    .SetEase(Ease.InCubic)
+                    .SetDelay(delay);
             }
 
             yield return new WaitForSeconds(discardMoveDuration + count * discardStagger);
@@ -307,7 +346,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private void RefreshButtons()
         {
             if (endTurnButton != null)
-                endTurnButton.interactable = !_battleService.IsBattleFinished;
+                endTurnButton.interactable = !_battleService.IsBattleFinished && !_isCardAnimating;
+
+            if (continueButton != null)
+                continueButton.interactable = _battleService.IsBattleFinished;
         }
 
         private void HandleBattleFinishUI()
@@ -338,7 +380,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             _finishRoutine = null;
         }
-        
+
         private void OnCardViewClicked(CardView cardView, CardSO card)
         {
             if (_isCardAnimating)
@@ -358,7 +400,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             StartCoroutine(PlayCardWithDiscardAnimation(cardView, card));
         }
-        
+
         private void ShowNotEnoughEnergy(CardView cardView)
         {
             RectTransform rect = cardView.GetComponent<RectTransform>();
@@ -380,7 +422,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             StopCoroutineSafe(ref _cardResultRoutine);
             _cardResultRoutine = StartCoroutine(HideCardResultRoutine());
         }
-        
+
         private IEnumerator PlayCardWithDiscardAnimation(CardView cardView, CardSO card)
         {
             _isCardAnimating = true;
@@ -416,21 +458,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             }
 
             _isCardAnimating = false;
-            
+
             RefreshUI();
-        }
-
-        private void ClearHand()
-        {
-            if (handRoot == null)
-                return;
-
-            for (int i = handRoot.childCount - 1; i >= 0; i--)
-            {
-                Transform child = handRoot.GetChild(i);
-                child.SetParent(null);
-                Destroy(child.gameObject);
-            }
         }
 
         private string BuildEffectsText(List<CardEffect> effects)
@@ -438,7 +467,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (effects == null || effects.Count == 0)
                 return "Без эффекта";
 
-            List<string> parts = new List<string>();
+            List<string> parts = new();
 
             for (int i = 0; i < effects.Count; i++)
             {
@@ -471,7 +500,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 coroutine = null;
             }
         }
-        
+
         private void OnContinueClicked()
         {
             if (_battleService == null || _runState == null)
@@ -483,6 +512,69 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
             }
 
+            ShowRewardPanel();
+        }
+
+        private void ShowRewardPanel()
+        {
+            if (_rewardShown)
+                return;
+
+            _rewardShown = true;
+
+            if (victoryPanel != null)
+                victoryPanel.SetActive(false);
+
+            if (rewardPanel != null)
+                rewardPanel.SetActive(true);
+
+            BuildRewardCards();
+        }
+
+        private void BuildRewardCards()
+        {
+            if (rewardCardsRoot == null || rewardCardPrefab == null)
+            {
+                Debug.LogError("BattleScreen: rewardCardsRoot or rewardCardPrefab is not assigned.");
+                return;
+            }
+
+            for (int i = rewardCardsRoot.childCount - 1; i >= 0; i--)
+                Destroy(rewardCardsRoot.GetChild(i).gameObject);
+
+            if (rewardPool == null || rewardPool.Count == 0)
+            {
+                Debug.LogError("BattleScreen: rewardPool is empty.");
+                return;
+            }
+
+            List<CardSO> rewards = _rewardService != null
+                ? _rewardService.GenerateCardRewards(rewardPool, rewardCardsCount)
+                : new List<CardSO>();
+
+            if (rewards == null || rewards.Count == 0)
+            {
+                Debug.LogError("BattleScreen: reward cards were not generated.");
+                return;
+            }
+
+            foreach (CardSO card in rewards)
+            {
+                RewardCardView view = Instantiate(rewardCardPrefab, rewardCardsRoot);
+                view.Setup(card, OnRewardSelected);
+            }
+        }
+
+        private void OnRewardSelected(CardSO card)
+        {
+            if (card != null)
+                _playerState.Deck.Add(card);
+
+            GoToMapAfterReward();
+        }
+
+        private void GoToMapAfterReward()
+        {
             if (_mapService != null && _mapService.State != null && _mapService.State.SelectedNodeId >= 0)
             {
                 _mapService.CompleteSelectedNode();

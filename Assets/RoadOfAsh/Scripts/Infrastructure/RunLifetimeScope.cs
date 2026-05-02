@@ -3,6 +3,7 @@ using RoadOfAsh.Scripts.Domain.Battle;
 using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Rewards;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
@@ -36,6 +37,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.Register<ICardService, CardService>(Lifetime.Singleton);
             builder.Register<IBattleService, BattleService>(Lifetime.Singleton);
             builder.Register<IMapService, MapService>(Lifetime.Singleton);
+            builder.Register<RewardService>(Lifetime.Singleton);
         }
 
         public static void LoadScene(string sceneName)
