@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 593c51e7ee66e1349acb1b38cc53c37c, type: 3}
   m_Name: Card_ForestWhisper
   m_EditorClassIdentifier: 
-  rarity: 1
   Id: forest_whisper_01
   CardName: "\u041B\u0435\u0441\u043D\u043E\u0439 \u0448\u0451\u043F\u043E\u0442"
   Description: "\u0412\u0437\u044F\u0442\u044C 2 \u043A\u0430\u0440\u0442\u044B"
@@ -20,6 +19,9 @@ MonoBehaviour:
     \u0418\u043D\u043E\u0433\u0434\u0430 \u0432\u0440\u0451\u0442."
   Type: 1
   Cost: 1
+  rarity: 1
+  powerScore: 14
+  canAppearInRewards: 1
   Effects:
   - Type: 2
     Value: 2
@@ -27,9 +29,7 @@ MonoBehaviour:
   ArtBackdrop: {fileID: 0}
   CanBeCorrupted: 1
   CorruptionChance: 0.35
+  CorruptedCost: 1
   CorruptedEffects:
-  - Type: 3
-    Value: 1
   - Type: 2
     Value: 1
-  CorruptedCost: 1

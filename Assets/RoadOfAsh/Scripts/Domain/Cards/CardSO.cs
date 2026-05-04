@@ -5,18 +5,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Card_", menuName = "Deckbuilder/Card")]
 public class CardSO : ScriptableObject
 {
-    [SerializeField] private CardRarity rarity = CardRarity.Common;
-    
     public string Id;
     public string CardName;
-
+    
     [TextArea] public string Description;
     [TextArea] public string FlavorText;
 
     public CardType Type;
-    public CardRarity Rarity => rarity;
-    
     public int Cost;
+    [SerializeField] private CardRarity rarity = CardRarity.Common;
+    
+    [Header("Balance")]
+    [SerializeField] private int powerScore = 10;
+    [SerializeField] private bool canAppearInRewards = true;
 
     public List<CardEffect> Effects = new();
 
@@ -28,7 +29,11 @@ public class CardSO : ScriptableObject
 
     [Range(0f, 1f)]
     public float CorruptionChance = 0.25f;
+    public int CorruptedCost;
 
     public List<CardEffect> CorruptedEffects = new();
-    public int CorruptedCost;
+    
+    public CardRarity Rarity => rarity;
+    public int PowerScore => powerScore;
+    public bool CanAppearInRewards => canAppearInRewards;
 }

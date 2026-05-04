@@ -18,6 +18,9 @@ MonoBehaviour:
   FlavorText: "\u0422\u0435\u043D\u044C \u043D\u0435 \u0436\u0434\u0451\u0442 \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u044F."
   Type: 1
   Cost: 0
+  rarity: 0
+  powerScore: 9
+  canAppearInRewards: 1
   Effects:
   - Type: 2
     Value: 1
@@ -25,7 +28,7 @@ MonoBehaviour:
   ArtBackdrop: {fileID: 390506720, guid: 4a2838b3767aeda40b28e6fce42a54a1, type: 3}
   CanBeCorrupted: 1
   CorruptionChance: 0.2
-  CorruptedEffects:
-  - Type: 5
-    Value: 1
   CorruptedCost: 0
+  CorruptedEffects:
+  - Type: 2
+    Value: 0

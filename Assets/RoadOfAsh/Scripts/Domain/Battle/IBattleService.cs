@@ -7,7 +7,10 @@ namespace RoadOfAsh.Scripts.Domain.Battle
     {
         event Action OnBattleStateChanged;
         event Action<CardSO, PlayedCardResult> OnCardPlayed;
-
+        event Action<int> OnEnemyDamaged;
+        event Action<int> OnPlayerDamaged;
+        event Action<int> OnPlayerBlocked;
+        event Action<int> OnEnemyPoisonTick;
         bool IsBattleFinished { get; }
         bool PlayerWon { get; }
         EnemyState CurrentEnemy { get; }

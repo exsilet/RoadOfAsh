@@ -6,8 +6,10 @@ namespace RoadOfAsh.Scripts.Domain.Rewards
 {
     public class RewardService
     {
-        private const float RareChance = 0.20f;
-        private const float UncommonChance = 0.45f;
+        private const float RareChance = 0.12f;
+        private const float UncommonChance = 0.38f;
+
+        private const int MaxRewardPowerScore = 22;
 
         public List<CardSO> GenerateCardRewards(List<CardSO> rewardPool, int count)
         {
@@ -16,7 +18,7 @@ namespace RoadOfAsh.Scripts.Domain.Rewards
             if (rewardPool == null || rewardPool.Count == 0)
                 return result;
 
-            List<CardSO> availableCards = new(rewardPool);
+            List<CardSO> availableCards = BuildAvailableRewardPool(rewardPool);
 
             for (int i = 0; i < count && availableCards.Count > 0; i++)
             {
@@ -24,10 +26,59 @@ namespace RoadOfAsh.Scripts.Domain.Rewards
                 CardSO card = PickCardByRarity(availableCards, rarity);
 
                 if (card == null)
-                    card = availableCards[Random.Range(0, availableCards.Count)];
+                    card = PickAnyCard(availableCards);
+
+                if (card == null)
+                    break;
 
                 result.Add(card);
                 availableCards.Remove(card);
+            }
+
+            return result;
+        }
+        
+        public List<RewardItem> GenerateBattleRewards(List<CardSO> rewardPool)
+        {
+            List<RewardItem> result = new();
+
+            List<CardSO> cards = GenerateCardRewards(rewardPool, 2);
+
+            foreach (CardSO card in cards)
+            {
+                result.Add(new RewardItem(RewardType.Card, card));
+            }
+
+            float roll = Random.value;
+
+            if (roll < 0.5f)
+            {
+                result.Add(new RewardItem(RewardType.Gold, amount: Random.Range(20, 36)));
+            }
+            else
+            {
+                result.Add(new RewardItem(RewardType.Heal, amount: Random.Range(8, 16)));
+            }
+
+            return result;
+        }
+
+        private List<CardSO> BuildAvailableRewardPool(List<CardSO> rewardPool)
+        {
+            List<CardSO> result = new();
+
+            foreach (CardSO card in rewardPool)
+            {
+                if (card == null)
+                    continue;
+
+                if (!card.CanAppearInRewards)
+                    continue;
+
+                if (card.PowerScore > MaxRewardPowerScore)
+                    continue;
+
+                result.Add(card);
             }
 
             return result;
@@ -60,6 +111,14 @@ namespace RoadOfAsh.Scripts.Domain.Rewards
                 return null;
 
             return filtered[Random.Range(0, filtered.Count)];
+        }
+
+        private CardSO PickAnyCard(List<CardSO> pool)
+        {
+            if (pool == null || pool.Count == 0)
+                return null;
+
+            return pool[Random.Range(0, pool.Count)];
         }
     }
 }

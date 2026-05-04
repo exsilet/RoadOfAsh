@@ -8,6 +8,7 @@ using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Infrastructure;
+using RoadOfAsh.Scripts.Presentation.Rewards;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,6 +32,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private GameObject victoryPanel;
         [SerializeField] private TMP_Text victoryText;
         [SerializeField] private float victoryDelay = 0.8f;
+        [SerializeField] private BattleEffectsView battleEffectsView;
+        [SerializeField] private BattleStatusView battleStatusView;
 
         [Header("Card Result UI")]
         [SerializeField] private TMP_Text cardResultText;
@@ -40,7 +43,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [Header("Reward UI")]
         [SerializeField] private GameObject rewardPanel;
         [SerializeField] private Transform rewardCardsRoot;
-        [SerializeField] private RewardCardView rewardCardPrefab;
+        [SerializeField] private RewardItemView rewardItemPrefab;
         [SerializeField] private Button skipRewardButton;
         [SerializeField] private List<CardSO> rewardPool;
         [SerializeField] private int rewardCardsCount = 3;
@@ -50,7 +53,13 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private string enemyName = "Баба-Яга";
         [SerializeField] private int enemyHp = 40;
         [SerializeField] private int enemyDamage = 6;
+        [SerializeField] private TMP_Text enemyIntentText;
+        [SerializeField] private TMP_Text enemyBlockText;
 
+        [Header("Reward Icons")]
+        [SerializeField] private Sprite goldRewardIcon;
+        [SerializeField] private Sprite healRewardIcon;
+        
         [Header("Card Play Animation")]
         [SerializeField] private RectTransform playTarget;
         [SerializeField] private RectTransform discardTarget;
@@ -79,13 +88,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private Coroutine _cardResultRoutine;
 
         [Inject]
-        public void Construct(
-            IBattleService battleService,
-            ICardService cardService,
-            PlayerState playerState,
-            IObjectResolver resolver,
-            IMapService mapService,
-            RunState runState,
+        public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState,
             RewardService rewardService)
         {
             _battleService = battleService;
@@ -136,19 +139,25 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 continueButton.onClick.AddListener(OnContinueClicked);
 
             if (skipRewardButton != null)
-                skipRewardButton.onClick.AddListener(GoToMapAfterReward);
+                skipRewardButton.onClick.AddListener(OnSkipRewardClicked);
 
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
 
             _battleService.OnBattleStateChanged += RefreshUI;
             _battleService.OnCardPlayed += OnCardPlayed;
+            
+            if (battleEffectsView != null)
+            {
+                _battleService.OnEnemyDamaged += battleEffectsView.ShowEnemyDamage;
+                _battleService.OnPlayerDamaged += battleEffectsView.ShowPlayerDamage;
+                _battleService.OnPlayerBlocked += battleEffectsView.ShowPlayerBlock;
+                _battleService.OnEnemyPoisonTick += battleEffectsView.ShowEnemyPoison;
+            }
 
             if (_playerState.Deck.Count == 0)
                 _playerState.Deck.AddRange(startingDeck);
-
-            // ВАЖНО: передаём копию, а не сам _playerState.Deck.
-            // Иначе CardService может очистить тот же список.
+            
             _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck));
 
             _battleService.StartBattle(new EnemyState
@@ -174,12 +183,20 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 continueButton.onClick.RemoveListener(OnContinueClicked);
 
             if (skipRewardButton != null)
-                skipRewardButton.onClick.RemoveListener(GoToMapAfterReward);
+                skipRewardButton.onClick.RemoveListener(OnSkipRewardClicked);
 
             if (_battleService != null)
             {
                 _battleService.OnBattleStateChanged -= RefreshUI;
                 _battleService.OnCardPlayed -= OnCardPlayed;
+                
+                if (battleEffectsView != null)
+                {
+                    _battleService.OnEnemyDamaged -= battleEffectsView.ShowEnemyDamage;
+                    _battleService.OnPlayerDamaged -= battleEffectsView.ShowPlayerDamage;
+                    _battleService.OnPlayerBlocked -= battleEffectsView.ShowPlayerBlock;
+                    _battleService.OnEnemyPoisonTick -= battleEffectsView.ShowEnemyPoison;
+                }
             }
         }
 
@@ -238,7 +255,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         {
             if (cardResultPanel != null)
                 cardResultPanel.SetActive(true);
-
+            
             if (cardResultText != null)
             {
                 string normalEffectsText = BuildEffectsText(card.Effects);
@@ -291,14 +308,39 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (playerHpText != null)
                 playerHpText.text = $"{_playerState.HP}/{_playerState.MaxHP}";
 
-            if (enemyHpText != null && _battleService.CurrentEnemy != null)
-                enemyHpText.text = $"HP: {_battleService.CurrentEnemy.HP}/{_battleService.CurrentEnemy.MaxHP}";
-
             if (playerEnergyText != null)
                 playerEnergyText.text = _playerState.Energy.ToString();
 
             if (playerBlockText != null)
                 playerBlockText.text = _playerState.Block.ToString();
+
+            EnemyState enemy = _battleService.CurrentEnemy;
+
+            if (enemy != null)
+            {
+                if (enemyHpText != null)
+                    enemyHpText.text = $"HP: {enemy.HP}/{enemy.MaxHP}";
+
+                if (enemyBlockText != null)
+                    enemyBlockText.text = enemy.Block.ToString();
+
+                if (enemyIntentText != null)
+                    enemyIntentText.text = BuildEnemyIntentText(enemy);
+            }
+
+            if (battleStatusView != null)
+                battleStatusView.Refresh(_playerState, enemy);
+        }
+        
+        private string BuildEnemyIntentText(EnemyState enemy)
+        {
+            return enemy.IntentType switch
+            {
+                EnemyIntentType.Attack => $"Намерение: атака {enemy.IntentValue}",
+                EnemyIntentType.Block => $"Намерение: защита {enemy.IntentValue}",
+                EnemyIntentType.Buff => "Намерение: усиление",
+                _ => "Намерение: неизвестно"
+            };
         }
 
         private void RefreshHand()
@@ -533,9 +575,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void BuildRewardCards()
         {
-            if (rewardCardsRoot == null || rewardCardPrefab == null)
+            if (rewardCardsRoot == null || rewardItemPrefab == null)
             {
-                Debug.LogError("BattleScreen: rewardCardsRoot or rewardCardPrefab is not assigned.");
+                Debug.LogError("BattleScreen: rewardCardsRoot or rewardItemPrefab is not assigned.");
                 return;
             }
 
@@ -548,28 +590,83 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
             }
 
-            List<CardSO> rewards = _rewardService != null
-                ? _rewardService.GenerateCardRewards(rewardPool, rewardCardsCount)
-                : new List<CardSO>();
+            List<RewardItem> rewards = _rewardService != null
+                ? _rewardService.GenerateBattleRewards(rewardPool)
+                : new List<RewardItem>();
+
+            rewards = AddRewardIcons(rewards);
 
             if (rewards == null || rewards.Count == 0)
             {
-                Debug.LogError("BattleScreen: reward cards were not generated.");
+                Debug.LogError("BattleScreen: reward items were not generated.");
                 return;
             }
 
-            foreach (CardSO card in rewards)
+            foreach (RewardItem reward in rewards)
             {
-                RewardCardView view = Instantiate(rewardCardPrefab, rewardCardsRoot);
-                view.Setup(card, OnRewardSelected);
+                RewardItemView view = Instantiate(rewardItemPrefab, rewardCardsRoot);
+                view.Setup(reward, OnRewardSelected);
             }
         }
-
-        private void OnRewardSelected(CardSO card)
+        
+        private List<RewardItem> AddRewardIcons(List<RewardItem> rewards)
         {
-            if (card != null)
-                _playerState.Deck.Add(card);
+            List<RewardItem> result = new();
 
+            foreach (RewardItem reward in rewards)
+            {
+                switch (reward.Type)
+                {
+                    case RewardType.Gold:
+                        result.Add(new RewardItem(
+                            RewardType.Gold,
+                            amount: reward.Amount,
+                            icon: goldRewardIcon));
+                        break;
+
+                    case RewardType.Heal:
+                        result.Add(new RewardItem(
+                            RewardType.Heal,
+                            amount: reward.Amount,
+                            icon: healRewardIcon));
+                        break;
+
+                    default:
+                        result.Add(reward);
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        private void OnRewardSelected(RewardItem reward)
+        {
+            if (reward == null)
+                return;
+
+            switch (reward.Type)
+            {
+                case RewardType.Card:
+                    if (reward.Card != null)
+                        _playerState.Deck.Add(reward.Card);
+                    break;
+
+                case RewardType.Gold:
+                    _runState.AddGold(reward.Amount);
+                    break;
+
+                case RewardType.Heal:
+                    _playerState.Heal(reward.Amount);
+                    break;
+            }
+
+            GoToMapAfterReward();
+        }
+        
+        private void OnSkipRewardClicked()
+        {
+            _runState.AddSkippedReward();
             GoToMapAfterReward();
         }
 

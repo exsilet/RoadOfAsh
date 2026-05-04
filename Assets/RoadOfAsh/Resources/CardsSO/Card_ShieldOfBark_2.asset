@@ -19,6 +19,9 @@ MonoBehaviour:
     \u043A\u043B\u044F\u0442\u0432."
   Type: 1
   Cost: 1
+  rarity: 0
+  powerScore: 5
+  canAppearInRewards: 0
   Effects:
   - Type: 1
     Value: 3
@@ -26,7 +29,7 @@ MonoBehaviour:
   ArtBackdrop: {fileID: -1995913037, guid: 4a2838b3767aeda40b28e6fce42a54a1, type: 3}
   CanBeCorrupted: 1
   CorruptionChance: 0.25
+  CorruptedCost: 1
   CorruptedEffects:
   - Type: 1
     Value: 1
-  CorruptedCost: 1

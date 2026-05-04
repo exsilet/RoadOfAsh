@@ -1,6 +1,7 @@
 using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Battle;
 using RoadOfAsh.Scripts.Domain.Cards;
+using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
@@ -35,6 +36,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.RegisterInstance(new RunState());
 
             builder.Register<ICardService, CardService>(Lifetime.Singleton);
+            builder.Register<IDistortionService, DistortionService>(Lifetime.Singleton);
             builder.Register<IBattleService, BattleService>(Lifetime.Singleton);
             builder.Register<IMapService, MapService>(Lifetime.Singleton);
             builder.Register<RewardService>(Lifetime.Singleton);

@@ -15,5 +15,16 @@ namespace RoadOfAsh.Scripts.Domain.Players
         public List<CardSO> Deck { get; } = new();
         public List<CardSO> Hand { get; } = new();
         public List<CardSO> Discard { get; } = new();
+        
+        public void Heal(int amount)
+        {
+            if (amount <= 0)
+                return;
+
+            HP += amount;
+
+            if (HP > MaxHP)
+                HP = MaxHP;
+        }
     }
 }
