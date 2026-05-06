@@ -12,8 +12,13 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
         [SerializeField] private Button button;
         [SerializeField] private Image artImage;
         [SerializeField] private TMP_Text titleText;
+        [Header("Card Reward")]
         [SerializeField] private Transform cardRoot;
         [SerializeField] private CardView cardPrefab;
+
+        [Header("Text Formats")]
+        [SerializeField] private string goldFormat = "+{0} золота";
+        [SerializeField] private string healFormat = "+{0} HP";
 
         private RewardItem _rewardItem;
         private System.Action<RewardItem> _onClicked;
@@ -25,8 +30,11 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
 
             RefreshView();
 
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(OnClicked);
+            if (button != null)
+            {
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(OnClicked);
+            }
         }
 
         private void RefreshView()
@@ -40,19 +48,22 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
                     break;
 
                 case RewardType.Gold:
-                    ShowSimpleReward($"+{_rewardItem.Amount} золота", _rewardItem.Icon);
+                    ShowSimpleReward(string.Format(goldFormat, _rewardItem.Amount), _rewardItem.Icon);
                     break;
 
                 case RewardType.Heal:
-                    ShowSimpleReward($"+{_rewardItem.Amount} HP", _rewardItem.Icon);
+                    ShowSimpleReward(string.Format(healFormat, _rewardItem.Amount), _rewardItem.Icon);
                     break;
             }
         }
-        
+
         private void ShowCardReward()
         {
-            artImage.gameObject.SetActive(false);
-            titleText.gameObject.SetActive(false);
+            if (artImage != null)
+                artImage.gameObject.SetActive(false);
+
+            if (titleText != null)
+                titleText.gameObject.SetActive(false);
 
             if (cardPrefab == null || cardRoot == null || _rewardItem.Card == null)
                 return;
@@ -62,23 +73,21 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
 
             DisableRaycasts(cardView.gameObject);
         }
-        
-        private void DisableRaycasts(GameObject root)
-        {
-            Graphic[] graphics = root.GetComponentsInChildren<Graphic>(true);
-
-            foreach (Graphic graphic in graphics)
-                graphic.raycastTarget = false;
-        }
 
         private void ShowSimpleReward(string title, Sprite icon)
         {
-            artImage.gameObject.SetActive(true);
-            titleText.gameObject.SetActive(true);
+            if (artImage != null)
+            {
+                artImage.gameObject.SetActive(true);
+                artImage.sprite = icon;
+                artImage.enabled = icon != null;
+            }
 
-            titleText.text = title;
-            artImage.sprite = icon;
-            artImage.enabled = icon != null;
+            if (titleText != null)
+            {
+                titleText.gameObject.SetActive(true);
+                titleText.text = title;
+            }
         }
 
         private void ClearCardRoot()
@@ -88,6 +97,14 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
 
             for (int i = cardRoot.childCount - 1; i >= 0; i--)
                 Destroy(cardRoot.GetChild(i).gameObject);
+        }
+
+        private void DisableRaycasts(GameObject root)
+        {
+            Graphic[] graphics = root.GetComponentsInChildren<Graphic>(true);
+
+            foreach (Graphic graphic in graphics)
+                graphic.raycastTarget = false;
         }
 
         private void OnClicked()

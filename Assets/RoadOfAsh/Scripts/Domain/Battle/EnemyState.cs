@@ -9,8 +9,9 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         public int Damage { get; set; }
         public int Weak { get; set; }
         public int Poison { get; set; }
-        
         public EnemyIntentType IntentType { get; set; }
         public int IntentValue { get; set; }
+        public int TurnIndex { get; set; }
+        public EnemyIntentStep[] Pattern { get; set; }
     }
 }

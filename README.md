@@ -1,3 +1,16 @@
+### Последнее обновление
+
+- BattleScreen начал разделяться на отдельные UI-компоненты:
+  - BattleHudView
+  - CardResultView
+  - BattleRewardView
+  - HandView
+  - CardPlayAnimator
+  - BattleResultView
+- Враги вынесены в EnemySO.
+- Добавлены паттерны намерений врага вместо случайного поведения.
+- Часть UI-текстов вынесена в Inspector для будущей локализации.
+
 # RoadOfAsh
 
 Карточный roguelite deckbuilder в мрачной сказочной стилистике.

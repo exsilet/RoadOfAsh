@@ -88,6 +88,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             {
                 _enemy.Block = 0;
                 ExecuteEnemyIntent();
+                _enemy.TurnIndex++;
                 
                 _enemy.Weak = 0;
             }
@@ -172,25 +173,18 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         
         private void RollEnemyIntent()
         {
-            float roll = Random.value;
-
-            if (roll < 0.45f)
+            if (_enemy.Pattern == null || _enemy.Pattern.Length == 0)
             {
                 _enemy.IntentType = EnemyIntentType.Attack;
                 _enemy.IntentValue = _enemy.Damage;
-            }
-            else if (roll < 0.75f)
-            {
-                _enemy.IntentType = EnemyIntentType.Block;
-                _enemy.IntentValue = 5;
-            }
-            else
-            {
-                _enemy.IntentType = EnemyIntentType.Buff;
-                _enemy.IntentValue = 1;
+                return;
             }
 
-            Debug.Log($"Enemy Intent: {_enemy.IntentType} {_enemy.IntentValue}");
+            int index = _enemy.TurnIndex % _enemy.Pattern.Length;
+            EnemyIntentStep step = _enemy.Pattern[index];
+
+            _enemy.IntentType = step.Type;
+            _enemy.IntentValue = step.Value;
         }
         
         private void ExecuteEnemyIntent()

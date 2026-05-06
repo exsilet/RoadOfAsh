@@ -10,24 +10,29 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private Transform playerEffectRoot;
         [SerializeField] private Transform enemyEffectRoot;
 
+        [Header("Text Formats")]
+        [SerializeField] private string damageFormat = "-{0}";
+        [SerializeField] private string blockFormat = "+{0} BLOCK";
+        [SerializeField] private string poisonFormat = "-{0} POISON";
+
         public void ShowPlayerDamage(int value)
         {
-            ShowText(playerEffectRoot, $"{value}");
+            ShowText(playerEffectRoot, string.Format(damageFormat, value));
         }
 
         public void ShowEnemyDamage(int value)
         {
-            ShowText(enemyEffectRoot, $"{value}");
+            ShowText(enemyEffectRoot, string.Format(damageFormat, value));
         }
 
         public void ShowPlayerBlock(int value)
         {
-            ShowText(playerEffectRoot, $"+{value} BLOCK");
+            ShowText(playerEffectRoot, string.Format(blockFormat, value));
         }
 
         public void ShowEnemyPoison(int value)
         {
-            ShowText(enemyEffectRoot, $"-{value} POISON");
+            ShowText(enemyEffectRoot, string.Format(poisonFormat, value));
         }
 
         private void ShowText(Transform root, string text)
@@ -37,6 +42,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             TMP_Text instance = Instantiate(floatingTextPrefab, root);
             instance.text = text;
+            instance.color = Color.white;
 
             RectTransform rect = instance.GetComponent<RectTransform>();
             rect.anchoredPosition = Vector2.zero;
