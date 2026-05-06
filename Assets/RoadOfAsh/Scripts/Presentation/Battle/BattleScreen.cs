@@ -22,8 +22,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private BattleHudView battleHudView;
 
         [Header("Battle Result UI")]
-        [SerializeField] private BattleResultView battleResultView;
-        [SerializeField] private float victoryDelay = 0.8f;
+        [SerializeField] private BattleCompletionView battleCompletionView;
         [SerializeField] private BattleEffectsView battleEffectsView;
         [SerializeField] private BattleStatusView battleStatusView;
 
@@ -35,18 +34,20 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         [Header("Battle Config")]
         [SerializeField] private List<CardSO> startingDeck;
-        [SerializeField] private EnemySO enemyConfig;
+        [SerializeField] private EnemySO tutorialEnemy;
+        [SerializeField] private EnemySO fallbackEnemyConfig;
         
         [Header("Card Play Animation")]
         [SerializeField] private CardPlayAnimator cardPlayAnimator;
 
         [Header("Scene Transition")]
-        [SerializeField] private Button continueButton;
+        [SerializeField] private string mainMenuSceneName = "MainMenu";
         [SerializeField] private string mapSceneName = "MapScene";
         [SerializeField] private string battleSceneName = "BattleScene";
 
         private bool _isCardAnimating;
         private bool _rewardShown;
+        private bool _finishShown;
 
         private IBattleService _battleService;
         private ICardService _cardService;
@@ -55,8 +56,6 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private IMapService _mapService;
         private RunState _runState;
         private RewardService _rewardService;
-
-        private Coroutine _finishRoutine;
 
         [Inject]
         public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState,
@@ -73,9 +72,6 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void Start()
         {
-            if (battleResultView != null)
-                battleResultView.Hide();
-
             if (battleRewardView != null)
                 battleRewardView.Initialize(_rewardService, OnRewardSelected, OnSkipRewardClicked);
             
@@ -96,9 +92,13 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             
             if (handView != null)
                 handView.Initialize(_resolver, OnCardViewClicked);
-
-            if (continueButton != null)
-                continueButton.onClick.AddListener(OnContinueClicked);
+            
+            if (battleCompletionView != null)
+            {
+                battleCompletionView.HideAll();
+                battleCompletionView.ContinueClicked += OnContinueClicked;
+                battleCompletionView.RestartRunClicked += OnRestartRunClicked;
+            }
 
             if (endTurnButton != null)
                 endTurnButton.onClick.AddListener(OnEndTurnClicked);
@@ -119,24 +119,27 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             
             _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck));
 
-            if (enemyConfig == null)
+            EnemySO enemy = GetEnemyForBattle();
+
+            if (enemy == null)
             {
-                Debug.LogError("BattleScreen: enemyConfig is not assigned.");
+                Debug.LogError("BattleScreen: enemy config is not assigned.");
                 return;
             }
 
-            _battleService.StartBattle(enemyConfig.CreateState());
+            _battleService.StartBattle(enemy.CreateState());
         }
 
         private void OnDestroy()
         {
-            StopCoroutineSafe(ref _finishRoutine);
-
             if (endTurnButton != null)
                 endTurnButton.onClick.RemoveListener(OnEndTurnClicked);
 
-            if (continueButton != null)
-                continueButton.onClick.RemoveListener(OnContinueClicked);
+            if (battleCompletionView != null)
+            {
+                battleCompletionView.ContinueClicked -= OnContinueClicked;
+                battleCompletionView.RestartRunClicked -= OnRestartRunClicked;
+            }
 
             if (_battleService != null)
             {
@@ -151,6 +154,22 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                     _battleService.OnEnemyPoisonTick -= battleEffectsView.ShowEnemyPoison;
                 }
             }
+        }
+        
+        private EnemySO GetEnemyForBattle()
+        {
+            if (_runState != null && !_runState.IntroBattleCompleted)
+                return tutorialEnemy;
+
+            if (_mapService != null && _mapService.State != null)
+            {
+                MapNodeData selectedNode = _mapService.GetSelectedNode();
+
+                if (selectedNode != null && selectedNode.Enemy != null)
+                    return selectedNode.Enemy;
+            }
+
+            return fallbackEnemyConfig;
         }
 
         private void OnEndTurnClicked()
@@ -208,34 +227,29 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (endTurnButton != null)
                 endTurnButton.interactable = !_battleService.IsBattleFinished && !_isCardAnimating;
 
-            if (continueButton != null)
-                continueButton.interactable = _battleService.IsBattleFinished;
+            if (battleCompletionView != null)
+                battleCompletionView.SetContinueInteractable(_battleService.IsBattleFinished);
         }
 
         private void HandleBattleFinishUI()
         {
             if (!_battleService.IsBattleFinished)
             {
-                if (battleResultView != null)
-                    battleResultView.Hide();
+                _finishShown = false;
+
+                if (battleCompletionView != null)
+                    battleCompletionView.HideAll();
 
                 return;
             }
 
-            if (_finishRoutine != null)
+            if (_finishShown)
                 return;
 
-            _finishRoutine = StartCoroutine(ShowFinishPanelRoutine());
-        }
+            _finishShown = true;
 
-        private IEnumerator ShowFinishPanelRoutine()
-        {
-            yield return new WaitForSeconds(victoryDelay);
-
-            if (battleResultView != null)
-                battleResultView.Show(_battleService.PlayerWon);
-
-            _finishRoutine = null;
+            if (battleCompletionView != null)
+                battleCompletionView.ShowBattleResult(_battleService.PlayerWon);
         }
 
         private void OnCardViewClicked(CardView cardView, CardSO card)
@@ -288,15 +302,6 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             RefreshUI();
         }
 
-        private void StopCoroutineSafe(ref Coroutine coroutine)
-        {
-            if (coroutine != null)
-            {
-                StopCoroutine(coroutine);
-                coroutine = null;
-            }
-        }
-
         private void OnContinueClicked()
         {
             if (_battleService == null || _runState == null)
@@ -305,6 +310,14 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (!_battleService.PlayerWon)
             {
                 RunLifetimeScope.LoadScene(battleSceneName);
+                return;
+            }
+
+            if (IsSelectedBossNode())
+            {
+                if (battleCompletionView != null)
+                    battleCompletionView.ShowChapterComplete();
+
                 return;
             }
 
@@ -318,8 +331,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             _rewardShown = true;
 
-            if (battleResultView != null)
-                battleResultView.Hide();
+            if (battleCompletionView != null)
+                battleCompletionView.HideAll();
 
             if (battleRewardView != null)
                 battleRewardView.Show();
@@ -367,6 +380,21 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             }
 
             RunLifetimeScope.LoadScene(mapSceneName);
+        }
+        
+        private bool IsSelectedBossNode()
+        {
+            if (_mapService == null || _mapService.State == null)
+                return false;
+
+            MapNodeData selectedNode = _mapService.GetSelectedNode();
+
+            return selectedNode != null && selectedNode.Type == MapNodeType.Boss;
+        }
+        
+        private void OnRestartRunClicked()
+        {
+            RunLifetimeScope.LoadScene(mainMenuSceneName);
         }
     }
 }

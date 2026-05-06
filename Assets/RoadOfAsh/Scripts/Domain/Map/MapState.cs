@@ -12,8 +12,17 @@ namespace RoadOfAsh.Scripts.Domain.Map
 
         public MapState(List<MapNodeData> nodes, int startNodeId)
         {
-            Nodes = nodes;
             CurrentNodeId = startNodeId;
+
+            foreach (MapNodeData node in nodes)
+            {
+                Nodes.Add(new MapNodeData(
+                    node.Id,
+                    node.Type,
+                    node.Position,
+                    node.NextNodeIds,
+                    node.Enemy));
+            }
         }
 
         public void SelectNode(int nodeId)

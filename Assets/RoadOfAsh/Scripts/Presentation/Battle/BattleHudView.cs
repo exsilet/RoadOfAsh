@@ -13,6 +13,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private TMP_Text playerBlockText;
         [SerializeField] private TMP_Text enemyBlockText;
         [SerializeField] private TMP_Text enemyIntentText;
+        [SerializeField] private TMP_Text enemyNameText;
 
         [Header("Text Formats")]
         [SerializeField] private string enemyHpFormat = "HP: {0}/{1}";
@@ -37,6 +38,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (enemy == null)
                 return;
+            
+            if (enemyNameText != null)
+                enemyNameText.text = enemy.Name;
 
             if (enemyHpText != null)
                 enemyHpText.text = string.Format(enemyHpFormat, enemy.HP, enemy.MaxHP);

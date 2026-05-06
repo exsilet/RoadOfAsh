@@ -18,55 +18,69 @@ MonoBehaviour:
     Type: 0
     Position: {x: -505, y: 0}
     NextNodeIds: 010000000200000003000000
+    Enemy: {fileID: 0}
   - Id: 1
     Type: 1
     Position: {x: -308, y: 322}
     NextNodeIds: 0400000005000000
+    Enemy: {fileID: 11400000, guid: d197193f73f07a94488b4d72f9e6c657, type: 2}
   - Id: 2
     Type: 2
     Position: {x: -298, y: 32}
     NextNodeIds: 0500000006000000
+    Enemy: {fileID: 0}
   - Id: 3
     Type: 1
     Position: {x: -307, y: -221}
     NextNodeIds: 0500000006000000
+    Enemy: {fileID: 11400000, guid: 73048906ffa0de247b9b97abd85b31a5, type: 2}
   - Id: 4
     Type: 1
     Position: {x: -83, y: 188}
     NextNodeIds: 07000000
+    Enemy: {fileID: 11400000, guid: caf43be13a5017b428cf3ca4298fda90, type: 2}
   - Id: 5
     Type: 4
     Position: {x: -82, y: -89}
     NextNodeIds: 0700000008000000
+    Enemy: {fileID: 0}
   - Id: 6
     Type: 1
     Position: {x: -97, y: -346}
     NextNodeIds: 0800000009000000
+    Enemy: {fileID: 11400000, guid: 6f84abcaee5c8fa4d8cff06859c80e46, type: 2}
   - Id: 7
     Type: 2
     Position: {x: 168, y: 351}
     NextNodeIds: 0a0000000b000000
+    Enemy: {fileID: 0}
   - Id: 8
     Type: 1
     Position: {x: 162, y: 20}
     NextNodeIds: 0a0000000b000000
+    Enemy: {fileID: 11400000, guid: a56db7dce2e65a340af366b69db8110f, type: 2}
   - Id: 9
     Type: 5
     Position: {x: 156, y: -202}
     NextNodeIds: 0a0000000b000000
+    Enemy: {fileID: 0}
   - Id: 10
     Type: 6
     Position: {x: 340, y: 213}
     NextNodeIds: 0c000000
+    Enemy: {fileID: 11400000, guid: 711f73d498c30184887da15facc08f8b, type: 2}
   - Id: 11
     Type: 3
     Position: {x: 368, y: -266}
     NextNodeIds: 0c000000
+    Enemy: {fileID: 0}
   - Id: 12
     Type: 4
     Position: {x: 356, y: -16}
     NextNodeIds: 0d000000
+    Enemy: {fileID: 0}
   - Id: 13
     Type: 7
     Position: {x: 548.18, y: 0}
     NextNodeIds: 
+    Enemy: {fileID: 11400000, guid: bd15f81598878a549a3c3a666fe17144, type: 2}

@@ -38,7 +38,7 @@ namespace RoadOfAsh.Scripts.Domain.Map
         {
             EnsureState();
 
-            var currentNode = State.Nodes.FirstOrDefault(n => n.Id == State.CurrentNodeId);
+            MapNodeData currentNode = State.Nodes.FirstOrDefault(n => n.Id == State.CurrentNodeId);
 
             if (currentNode == null)
                 return false;
@@ -74,9 +74,7 @@ namespace RoadOfAsh.Scripts.Domain.Map
         private void EnsureState()
         {
             if (State == null)
-                    throw new System.InvalidOperationException(
-                        "MapState is null. Call CreateNewMap(mapConfig) before using MapService."
-                    );
+                throw new System.InvalidOperationException("MapState is null. Call CreateNewMap(mapConfig) before using MapService.");
         }
     }
 }
