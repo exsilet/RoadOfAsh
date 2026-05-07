@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RoadOfAsh.Scripts.Domain.Cards;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;

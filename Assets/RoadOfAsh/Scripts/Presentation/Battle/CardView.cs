@@ -1,5 +1,6 @@
 using System;
 using RoadOfAsh.Scripts.Domain.Battle;
+using RoadOfAsh.Scripts.Domain.Cards;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

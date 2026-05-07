@@ -9,12 +9,15 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
     {
         [SerializeField] private BattleResultView battleResultView;
         [SerializeField] private GameObject chapterCompletePanel;
+
+        [Header("Buttons")]
         [SerializeField] private Button continueButton;
         [SerializeField] private Button restartRunButton;
 
+        [Header("Timing")]
         [SerializeField] private float resultDelay = 0.8f;
 
-        private Coroutine _showResultRoutine;
+        private Coroutine _showRoutine;
 
         public event Action ContinueClicked;
         public event Action RestartRunClicked;
@@ -24,19 +27,25 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             HideAll();
 
             if (continueButton != null)
-                continueButton.onClick.AddListener(OnContinueClicked);
+            {
+                continueButton.onClick.RemoveAllListeners();
+                continueButton.onClick.AddListener(() => ContinueClicked?.Invoke());
+            }
 
             if (restartRunButton != null)
-                restartRunButton.onClick.AddListener(OnRestartRunClicked);
+            {
+                restartRunButton.onClick.RemoveAllListeners();
+                restartRunButton.onClick.AddListener(() => RestartRunClicked?.Invoke());
+            }
         }
 
         private void OnDestroy()
         {
             if (continueButton != null)
-                continueButton.onClick.RemoveListener(OnContinueClicked);
+                continueButton.onClick.RemoveAllListeners();
 
             if (restartRunButton != null)
-                restartRunButton.onClick.RemoveListener(OnRestartRunClicked);
+                restartRunButton.onClick.RemoveAllListeners();
         }
 
         public void HideAll()
@@ -57,7 +66,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         public void ShowBattleResult(bool playerWon)
         {
             StopShowRoutine();
-            _showResultRoutine = StartCoroutine(ShowBattleResultRoutine(playerWon));
+            _showRoutine = StartCoroutine(ShowBattleResultRoutine(playerWon));
         }
 
         public void ShowChapterComplete()
@@ -76,26 +85,16 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (battleResultView != null)
                 battleResultView.Show(playerWon);
 
-            _showResultRoutine = null;
+            _showRoutine = null;
         }
 
         private void StopShowRoutine()
         {
-            if (_showResultRoutine == null)
+            if (_showRoutine == null)
                 return;
 
-            StopCoroutine(_showResultRoutine);
-            _showResultRoutine = null;
-        }
-
-        private void OnContinueClicked()
-        {
-            ContinueClicked?.Invoke();
-        }
-
-        private void OnRestartRunClicked()
-        {
-            RestartRunClicked?.Invoke();
+            StopCoroutine(_showRoutine);
+            _showRoutine = null;
         }
     }
 }

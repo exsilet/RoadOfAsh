@@ -1,9 +1,12 @@
-public enum EffectType
+namespace RoadOfAsh.Scripts.Domain.Cards
 {
-    Damage,
-    Block,
-    Draw,
-    ApplyWeak,
-    ApplyPoison,
-    GainEnergy
+    public enum EffectType
+    {
+        Damage,
+        Block,
+        Draw,
+        ApplyWeak,
+        ApplyPoison,
+        GainEnergy
+    }
 }

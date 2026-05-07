@@ -1,7 +1,10 @@
-public enum CardType
+namespace RoadOfAsh.Scripts.Domain.Cards
 {
-    Attack,
-    Skill,
-    Power,
-    Curse
+    public enum CardType
+    {
+        Attack,
+        Skill,
+        Power,
+        Curse
+    }
 }

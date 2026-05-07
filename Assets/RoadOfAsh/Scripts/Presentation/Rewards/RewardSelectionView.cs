@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
+using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Rewards;
-using RoadOfAsh.Scripts.Presentation.Rewards;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace RoadOfAsh.Scripts.Presentation.Battle
+namespace RoadOfAsh.Scripts.Presentation.Rewards
 {
-    public class BattleRewardView : MonoBehaviour
+    public class RewardSelectionView : MonoBehaviour
     {
         [SerializeField] private GameObject panel;
-        [SerializeField] private Transform rewardCardsRoot;
+        [SerializeField] private Transform rewardRoot;
         [SerializeField] private RewardItemView rewardItemPrefab;
-        [SerializeField] private Button skipRewardButton;
+        [SerializeField] private Button skipButton;
         [SerializeField] private List<CardSO> rewardPool;
 
         [Header("Icons")]
@@ -25,26 +25,23 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void OnDestroy()
         {
-            if (skipRewardButton != null)
-                skipRewardButton.onClick.RemoveListener(OnSkipClicked);
+            if (skipButton != null)
+                skipButton.onClick.RemoveListener(OnSkipClicked);
         }
 
-        public void Initialize(
-            RewardService rewardService,
-            Action<RewardItem> onRewardSelected,
-            Action onRewardSkipped)
+        public void Initialize(RewardService rewardService, Action<RewardItem> onRewardSelected, Action onRewardSkipped)
         {
             _rewardService = rewardService;
             _onRewardSelected = onRewardSelected;
             _onRewardSkipped = onRewardSkipped;
 
-            if (skipRewardButton != null)
-            {
-                skipRewardButton.onClick.RemoveAllListeners();
-                skipRewardButton.onClick.AddListener(OnSkipClicked);
-            }
-
             Hide();
+
+            if (skipButton != null)
+            {
+                skipButton.onClick.RemoveAllListeners();
+                skipButton.onClick.AddListener(OnSkipClicked);
+            }
         }
 
         public void Show()
@@ -63,40 +60,31 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void BuildRewards()
         {
-            if (rewardCardsRoot == null || rewardItemPrefab == null)
+            if (rewardRoot == null || rewardItemPrefab == null)
             {
-                Debug.LogError("BattleRewardView: rewardCardsRoot or rewardItemPrefab is not assigned.");
+                Debug.LogError("RewardSelectionView: rewardRoot or rewardItemPrefab is not assigned.");
                 return;
             }
 
             ClearRewards();
 
-            if (rewardPool == null || rewardPool.Count == 0)
+            if (_rewardService == null || rewardPool == null || rewardPool.Count == 0)
             {
-                Debug.LogError("BattleRewardView: rewardPool is empty.");
+                Debug.LogError("RewardSelectionView: reward service or reward pool is missing.");
                 return;
             }
 
-            List<RewardItem> rewards = _rewardService != null
-                ? _rewardService.GenerateBattleRewards(rewardPool)
-                : new List<RewardItem>();
-
-            rewards = AddRewardIcons(rewards);
-
-            if (rewards.Count == 0)
-            {
-                Debug.LogError("BattleRewardView: reward items were not generated.");
-                return;
-            }
+            List<RewardItem> rewards = _rewardService.GenerateBattleRewards(rewardPool);
+            rewards = AddIcons(rewards);
 
             foreach (RewardItem reward in rewards)
             {
-                RewardItemView view = Instantiate(rewardItemPrefab, rewardCardsRoot);
+                RewardItemView view = Instantiate(rewardItemPrefab, rewardRoot);
                 view.Setup(reward, OnRewardClicked);
             }
         }
 
-        private List<RewardItem> AddRewardIcons(List<RewardItem> rewards)
+        private List<RewardItem> AddIcons(List<RewardItem> rewards)
         {
             List<RewardItem> result = new();
 
@@ -105,17 +93,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 switch (reward.Type)
                 {
                     case RewardType.Gold:
-                        result.Add(new RewardItem(
-                            RewardType.Gold,
-                            amount: reward.Amount,
-                            icon: goldRewardIcon));
+                        result.Add(new RewardItem(RewardType.Gold, amount: reward.Amount, icon: goldRewardIcon));
                         break;
 
                     case RewardType.Heal:
-                        result.Add(new RewardItem(
-                            RewardType.Heal,
-                            amount: reward.Amount,
-                            icon: healRewardIcon));
+                        result.Add(new RewardItem(RewardType.Heal, amount: reward.Amount, icon: healRewardIcon));
                         break;
 
                     default:
@@ -129,8 +111,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void ClearRewards()
         {
-            for (int i = rewardCardsRoot.childCount - 1; i >= 0; i--)
-                Destroy(rewardCardsRoot.GetChild(i).gameObject);
+            for (int i = rewardRoot.childCount - 1; i >= 0; i--)
+                Destroy(rewardRoot.GetChild(i).gameObject);
         }
 
         private void OnRewardClicked(RewardItem reward)

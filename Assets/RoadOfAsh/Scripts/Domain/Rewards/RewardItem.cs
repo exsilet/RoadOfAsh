@@ -1,3 +1,4 @@
+using RoadOfAsh.Scripts.Domain.Cards;
 using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Domain.Rewards

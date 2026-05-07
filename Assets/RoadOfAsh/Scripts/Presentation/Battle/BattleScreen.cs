@@ -8,6 +8,7 @@ using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Infrastructure;
+using RoadOfAsh.Scripts.Presentation.Rewards;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -30,7 +31,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private CardResultView cardResultView;
 
         [Header("Reward UI")]
-        [SerializeField] private BattleRewardView battleRewardView;
+        [SerializeField] private RewardSelectionView rewardSelectionView;
 
         [Header("Battle Config")]
         [SerializeField] private List<CardSO> startingDeck;
@@ -72,8 +73,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void Start()
         {
-            if (battleRewardView != null)
-                battleRewardView.Initialize(_rewardService, OnRewardSelected, OnSkipRewardClicked);
+            if (rewardSelectionView != null)
+                rewardSelectionView.Initialize(_rewardService, OnRewardSelected, OnSkipRewardClicked);
             
             if (cardResultView != null)
                 cardResultView.HideInstant();
@@ -309,7 +310,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (!_battleService.PlayerWon)
             {
-                RunLifetimeScope.LoadScene(battleSceneName);
+                RestartAfterDefeat();
                 return;
             }
 
@@ -323,6 +324,17 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             ShowRewardPanel();
         }
+        
+        private void RestartAfterDefeat()
+        {
+            _playerState.HP = Mathf.Max(1, Mathf.RoundToInt(_playerState.MaxHP * 0.5f));
+            _playerState.Block = 0;
+            _playerState.Energy = 3;
+            _playerState.Weak = 0;
+            _playerState.Poison = 0;
+
+            RunLifetimeScope.LoadScene(battleSceneName);
+        }
 
         private void ShowRewardPanel()
         {
@@ -334,8 +346,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (battleCompletionView != null)
                 battleCompletionView.HideAll();
 
-            if (battleRewardView != null)
-                battleRewardView.Show();
+            if (rewardSelectionView != null)
+                rewardSelectionView.Show();
         }
 
         private void OnRewardSelected(RewardItem reward)
