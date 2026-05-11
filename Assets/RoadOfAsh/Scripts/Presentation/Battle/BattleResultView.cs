@@ -25,9 +25,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (resultText != null)
             {
-                resultText.text = playerWon
-                    ? victoryText
-                    : defeatText;
+                if (playerWon)
+                    resultText.text = victoryText;
+                else
+                    resultText.text = defeatText;
             }
         }
     }

@@ -1,56 +1,103 @@
-using DG.Tweening;
-using TMPro;
 using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Presentation.Battle
 {
     public class BattleEffectsView : MonoBehaviour
     {
-        [SerializeField] private TMP_Text floatingTextPrefab;
+        [Header("Popup")]
+        [SerializeField] private BattleEffectPopup popupPrefab;
         [SerializeField] private Transform playerEffectRoot;
         [SerializeField] private Transform enemyEffectRoot;
 
-        [Header("Text Formats")]
-        [SerializeField] private string damageFormat = "-{0}";
-        [SerializeField] private string blockFormat = "+{0} BLOCK";
-        [SerializeField] private string poisonFormat = "-{0} POISON";
+        [Header("Icons")]
+        [SerializeField] private Sprite damageIcon;
+        [SerializeField] private Sprite blockIcon;
+        [SerializeField] private Sprite poisonIcon;
+        [SerializeField] private Sprite weakIcon;
+        [SerializeField] private Sprite healIcon;
+        [SerializeField] private Sprite cleanseIcon;
+
+        [Header("VFX Prefabs")]
+        [SerializeField] private GameObject playerDamageVfxPrefab;
+        [SerializeField] private GameObject enemyDamageVfxPrefab;
+        [SerializeField] private GameObject playerBlockVfxPrefab;
+        [SerializeField] private GameObject enemyPoisonVfxPrefab;
+        [SerializeField] private GameObject playerPoisonVfxPrefab;
+        [SerializeField] private GameObject playerWeakVfxPrefab;
+        [SerializeField] private GameObject enemyHealVfxPrefab;
+        [SerializeField] private GameObject enemyCleanseVfxPrefab;
+
+        [Header("Animation")]
+        [SerializeField] private float popupMoveY = 80f;
+        [SerializeField] private float popupDuration = 0.6f;
+        [SerializeField] private float vfxLifetime = 1.2f;
 
         public void ShowPlayerDamage(int value)
         {
-            ShowText(playerEffectRoot, string.Format(damageFormat, value));
+            ShowPopup(playerEffectRoot, damageIcon, value);
+            PlayVfx(playerEffectRoot, playerDamageVfxPrefab);
         }
 
         public void ShowEnemyDamage(int value)
         {
-            ShowText(enemyEffectRoot, string.Format(damageFormat, value));
+            ShowPopup(enemyEffectRoot, damageIcon, value);
+            PlayVfx(enemyEffectRoot, enemyDamageVfxPrefab);
         }
 
         public void ShowPlayerBlock(int value)
         {
-            ShowText(playerEffectRoot, string.Format(blockFormat, value));
+            ShowPopup(playerEffectRoot, blockIcon, value);
+            PlayVfx(playerEffectRoot, playerBlockVfxPrefab);
         }
 
         public void ShowEnemyPoison(int value)
         {
-            ShowText(enemyEffectRoot, string.Format(poisonFormat, value));
+            ShowPopup(enemyEffectRoot, poisonIcon, value);
+            PlayVfx(enemyEffectRoot, enemyPoisonVfxPrefab);
         }
 
-        private void ShowText(Transform root, string text)
+        public void ShowPlayerPoison(int value)
         {
-            if (root == null || floatingTextPrefab == null)
+            ShowPopup(playerEffectRoot, poisonIcon, value);
+            PlayVfx(playerEffectRoot, playerPoisonVfxPrefab);
+        }
+
+        public void ShowPlayerWeak(int value)
+        {
+            ShowPopup(playerEffectRoot, weakIcon, value);
+            PlayVfx(playerEffectRoot, playerWeakVfxPrefab);
+        }
+
+        public void ShowEnemyHeal(int value)
+        {
+            ShowPopup(enemyEffectRoot, healIcon, value);
+            PlayVfx(enemyEffectRoot, enemyHealVfxPrefab);
+        }
+
+        public void ShowEnemyCleanse()
+        {
+            ShowPopup(enemyEffectRoot, cleanseIcon, null);
+            PlayVfx(enemyEffectRoot, enemyCleanseVfxPrefab);
+        }
+
+        private void ShowPopup(Transform root, Sprite icon, int? value)
+        {
+            if (root == null || popupPrefab == null)
                 return;
 
-            TMP_Text instance = Instantiate(floatingTextPrefab, root);
-            instance.text = text;
-            instance.color = Color.white;
+            BattleEffectPopup popup = Instantiate(popupPrefab, root);
+            popup.Setup(icon, value);
+            popup.Play(popupMoveY, popupDuration);
+        }
 
-            RectTransform rect = instance.GetComponent<RectTransform>();
-            rect.anchoredPosition = Vector2.zero;
+        private void PlayVfx(Transform root, GameObject prefab)
+        {
+            if (root == null || prefab == null)
+                return;
 
-            Sequence sequence = DOTween.Sequence();
-            sequence.Append(rect.DOAnchorPosY(80f, 0.6f));
-            sequence.Join(instance.DOFade(0f, 0.6f));
-            sequence.OnComplete(() => Destroy(instance.gameObject));
+            GameObject instance = Instantiate(prefab, root);
+            instance.transform.localPosition = Vector3.zero;
+            Destroy(instance, vfxLifetime);
         }
     }
 }

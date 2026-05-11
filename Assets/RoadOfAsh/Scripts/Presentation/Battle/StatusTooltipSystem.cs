@@ -22,11 +22,16 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         public void Show(string title, string description, RectTransform target)
         {
+            Show(null, title, description, target);
+        }
+
+        public void Show(Sprite icon, string title, string description, RectTransform target)
+        {
             if (closeArea != null)
                 closeArea.SetActive(true);
 
             if (tooltipView != null)
-                tooltipView.Show(title, description, target);
+                tooltipView.Show(icon, title, description, target);
         }
 
         public void Hide()

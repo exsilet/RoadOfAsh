@@ -1,3 +1,72 @@
+RoadOfAsh — текущий блок работ
+
+Сделано:
+1. Добавили новые enemy intent-типы:
+   - DistortNextCard
+   - ApplyWeakToPlayer
+   - ApplyPoisonToPlayer
+   - HealSelf
+   - CleanseSelf
+
+2. Подключили DistortNextCard:
+   - враг может заставить следующую карту игрока исказиться
+   - иконка искажения уже считается сделанной
+
+3. Добавили новые возможности врагов:
+   - наложить слабость на игрока
+   - наложить яд на игрока
+   - вылечить себя
+   - очистить себя от статусов
+
+4. Обсудили и настроили более нормальные паттерны врагов:
+   - Серый Волк — базовая агрессия
+   - Кикимора — слабость
+   - Леший — блок / очищение
+   - Водяной — яд
+   - Русалка — слабость / лечение
+   - Чёрный Волк — элитный агрессор
+   - Баба-Яга — искажение карт
+
+5. Переделали BattleEffectsView:
+   - убрали текстовые боевые сообщения типа "+2 ЯД"
+   - сделали формат: иконка + число + optional VFX
+   - добавили BattleEffectPopup
+   - оставили старые публичные методы, чтобы не ломать BattleScreen:
+     ShowPlayerDamage
+     ShowEnemyDamage
+     ShowPlayerBlock
+     ShowEnemyPoison
+   - добавили новые методы:
+     ShowPlayerPoison
+     ShowPlayerWeak
+     ShowEnemyHeal
+     ShowEnemyCleanse
+
+6. Подключили новые события боя:
+   - OnPlayerPoisoned
+   - OnPlayerWeakened
+   - OnEnemyHealed
+   - OnEnemyCleansed
+
+7. Подключили BattleScreen к новым визуальным эффектам:
+   - яд на игроке показывает иконку яда
+   - слабость показывает иконку слабости
+   - лечение врага показывает иконку лечения
+   - очищение врага показывает иконку очищения
+
+8. Переделали enemy intent UI:
+   - убрали текстовое "Намерение: атака 6"
+   - теперь на HUD показывается только иконка намерения
+
+9. Добавили EnemyIntentView:
+   - показывает иконку намерения врага
+   - по клику открывает tooltip
+
+10. Расширили tooltip:
+   - StatusTooltipView теперь умеет показывать иконку
+   - StatusTooltipSystem получил Show(Sprite icon, string title, string description, RectTransform target)
+   - старый Show(title, description, target) оставлен, чтобы не ломать статусы
+
 ## Последнее обновление
 
 ### Battle

@@ -12,20 +12,44 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private TMP_Text playerEnergyText;
         [SerializeField] private TMP_Text playerBlockText;
         [SerializeField] private TMP_Text enemyBlockText;
-        [SerializeField] private TMP_Text enemyIntentText;
         [SerializeField] private TMP_Text enemyNameText;
+
+        [Header("Enemy Intent")]
+        [SerializeField] private EnemyIntentView enemyIntentView;
+        [SerializeField] private StatusTooltipSystem tooltipSystem;
+
+        [Header("Intent Icons")]
+        [SerializeField] private Sprite attackIntentIcon;
+        [SerializeField] private Sprite blockIntentIcon;
+        [SerializeField] private Sprite buffIntentIcon;
+        [SerializeField] private Sprite distortIntentIcon;
+        [SerializeField] private Sprite weakIntentIcon;
+        [SerializeField] private Sprite poisonIntentIcon;
+        [SerializeField] private Sprite healIntentIcon;
+        [SerializeField] private Sprite cleanseIntentIcon;
 
         [Header("Text Formats")]
         [SerializeField] private string enemyHpFormat = "HP: {0}/{1}";
-        [SerializeField] private string attackIntentFormat = "Намерение: атака {0}";
-        [SerializeField] private string blockIntentFormat = "Намерение: защита {0}";
-        [SerializeField] private string buffIntentText = "Намерение: усиление";
-        [SerializeField] private string distortIntentText = "Намерение: ведьмовство";
-        [SerializeField] private string applyWeakIntentFormat = "Намерение: слабость {0}";
-        [SerializeField] private string applyPoisonIntentFormat = "Намерение: яд {0}";
-        [SerializeField] private string healSelfIntentFormat = "Намерение: лечение {0}";
-        [SerializeField] private string cleanseSelfIntentText = "Намерение: очищение";
-        [SerializeField] private string unknownIntentText = "Намерение: неизвестно";
+
+        [Header("Intent Tooltip Titles")]
+        [SerializeField] private string attackTitle = "Атака";
+        [SerializeField] private string blockTitle = "Защита";
+        [SerializeField] private string buffTitle = "Усиление";
+        [SerializeField] private string distortTitle = "Искажение";
+        [SerializeField] private string weakTitle = "Слабость";
+        [SerializeField] private string poisonTitle = "Яд";
+        [SerializeField] private string healTitle = "Лечение";
+        [SerializeField] private string cleanseTitle = "Очищение";
+
+        [Header("Intent Tooltip Descriptions")]
+        [SerializeField] private string attackDescriptionFormat = "Атакует на {0}.";
+        [SerializeField] private string blockDescriptionFormat = "Поставит {0} блока.";
+        [SerializeField] private string buffDescription = "Усилится.";
+        [SerializeField] private string distortDescription = "Следующая карта игрока будет искажена.";
+        [SerializeField] private string weakDescriptionFormat = "Наложит {0} слабости.";
+        [SerializeField] private string poisonDescriptionFormat = "Наложит {0} яда.";
+        [SerializeField] private string healDescriptionFormat = "Восстановит {0} HP.";
+        [SerializeField] private string cleanseDescription = "Снимет с себя яд и слабость.";
 
         public void Refresh(PlayerState playerState, EnemyState enemy)
         {
@@ -43,7 +67,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (enemy == null)
                 return;
-            
+
             if (enemyNameText != null)
                 enemyNameText.text = enemy.Name;
 
@@ -53,23 +77,66 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (enemyBlockText != null)
                 enemyBlockText.text = enemy.Block.ToString();
 
-            if (enemyIntentText != null)
-                enemyIntentText.text = BuildEnemyIntentText(enemy);
+            RefreshEnemyIntent(enemy);
         }
 
-        private string BuildEnemyIntentText(EnemyState enemy)
+        private void RefreshEnemyIntent(EnemyState enemy)
         {
-            return enemy.IntentType switch
+            if (enemyIntentView == null)
+                return;
+
+            Sprite icon = GetIntentIcon(enemy.IntentType);
+            string title = GetIntentTitle(enemy.IntentType);
+            string description = GetIntentDescription(enemy.IntentType, enemy.IntentValue);
+
+            enemyIntentView.Setup(icon, title, description, tooltipSystem);
+        }
+
+        private Sprite GetIntentIcon(EnemyIntentType intentType)
+        {
+            return intentType switch
             {
-                EnemyIntentType.Attack => string.Format(attackIntentFormat, enemy.IntentValue),
-                EnemyIntentType.Block => string.Format(blockIntentFormat, enemy.IntentValue),
-                EnemyIntentType.Buff => buffIntentText,
-                EnemyIntentType.DistortNextCard => distortIntentText,
-                EnemyIntentType.ApplyWeakToPlayer => string.Format(applyWeakIntentFormat, enemy.IntentValue),
-                EnemyIntentType.ApplyPoisonToPlayer => string.Format(applyPoisonIntentFormat, enemy.IntentValue),
-                EnemyIntentType.HealSelf => string.Format(healSelfIntentFormat, enemy.IntentValue),
-                EnemyIntentType.CleanseSelf => cleanseSelfIntentText,
-                _ => unknownIntentText
+                EnemyIntentType.Attack => attackIntentIcon,
+                EnemyIntentType.Block => blockIntentIcon,
+                EnemyIntentType.Buff => buffIntentIcon,
+                EnemyIntentType.DistortNextCard => distortIntentIcon,
+                EnemyIntentType.ApplyWeakToPlayer => weakIntentIcon,
+                EnemyIntentType.ApplyPoisonToPlayer => poisonIntentIcon,
+                EnemyIntentType.HealSelf => healIntentIcon,
+                EnemyIntentType.CleanseSelf => cleanseIntentIcon,
+                _ => null
+            };
+        }
+
+        private string GetIntentTitle(EnemyIntentType intentType)
+        {
+            return intentType switch
+            {
+                EnemyIntentType.Attack => attackTitle,
+                EnemyIntentType.Block => blockTitle,
+                EnemyIntentType.Buff => buffTitle,
+                EnemyIntentType.DistortNextCard => distortTitle,
+                EnemyIntentType.ApplyWeakToPlayer => weakTitle,
+                EnemyIntentType.ApplyPoisonToPlayer => poisonTitle,
+                EnemyIntentType.HealSelf => healTitle,
+                EnemyIntentType.CleanseSelf => cleanseTitle,
+                _ => string.Empty
+            };
+        }
+
+        private string GetIntentDescription(EnemyIntentType intentType, int value)
+        {
+            return intentType switch
+            {
+                EnemyIntentType.Attack => string.Format(attackDescriptionFormat, value),
+                EnemyIntentType.Block => string.Format(blockDescriptionFormat, value),
+                EnemyIntentType.Buff => buffDescription,
+                EnemyIntentType.DistortNextCard => distortDescription,
+                EnemyIntentType.ApplyWeakToPlayer => string.Format(weakDescriptionFormat, value),
+                EnemyIntentType.ApplyPoisonToPlayer => string.Format(poisonDescriptionFormat, value),
+                EnemyIntentType.HealSelf => string.Format(healDescriptionFormat, value),
+                EnemyIntentType.CleanseSelf => cleanseDescription,
+                _ => string.Empty
             };
         }
     }

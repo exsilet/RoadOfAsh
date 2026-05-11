@@ -116,6 +116,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 _battleService.OnPlayerDamaged += battleEffectsView.ShowPlayerDamage;
                 _battleService.OnPlayerBlocked += battleEffectsView.ShowPlayerBlock;
                 _battleService.OnEnemyPoisonTick += battleEffectsView.ShowEnemyPoison;
+                
+                _battleService.OnPlayerPoisoned += battleEffectsView.ShowPlayerPoison;
+                _battleService.OnPlayerWeakened += battleEffectsView.ShowPlayerWeak;
+                _battleService.OnEnemyHealed += battleEffectsView.ShowEnemyHeal;
+                _battleService.OnEnemyCleansed += battleEffectsView.ShowEnemyCleanse;
             }
 
             if (_playerState.Deck.Count == 0)
@@ -156,6 +161,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                     _battleService.OnPlayerDamaged -= battleEffectsView.ShowPlayerDamage;
                     _battleService.OnPlayerBlocked -= battleEffectsView.ShowPlayerBlock;
                     _battleService.OnEnemyPoisonTick -= battleEffectsView.ShowEnemyPoison;
+                    
+                    _battleService.OnPlayerPoisoned -= battleEffectsView.ShowPlayerPoison;
+                    _battleService.OnPlayerWeakened -= battleEffectsView.ShowPlayerWeak;
+                    _battleService.OnEnemyHealed -= battleEffectsView.ShowEnemyHeal;
+                    _battleService.OnEnemyCleansed -= battleEffectsView.ShowEnemyCleanse;
                 }
             }
         }
