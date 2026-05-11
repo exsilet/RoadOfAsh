@@ -17,10 +17,10 @@ MonoBehaviour:
   damage: 7
   pattern:
   - Type: 0
-    Value: 7
-  - Type: 0
-    Value: 5
+    Value: 6
   - Type: 1
     Value: 4
   - Type: 0
-    Value: 9
+    Value: 8
+  - Type: 0
+    Value: 10

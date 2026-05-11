@@ -20,8 +20,10 @@ MonoBehaviour:
     Value: 10
   - Type: 0
     Value: 10
-  - Type: 2
-    Value: 1
+  - Type: 7
+    Value: 0
+  - Type: 6
+    Value: 8
   - Type: 0
     Value: 14
   - Type: 0

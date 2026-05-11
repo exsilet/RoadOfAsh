@@ -1,6 +1,8 @@
 using RoadOfAsh.Scripts.Domain.Battle;
+using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Players;
 using UnityEngine;
+using VContainer;
 
 namespace RoadOfAsh.Scripts.Presentation.Battle
 {
@@ -14,6 +16,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [Header("Icons")]
         [SerializeField] private Sprite poisonIcon;
         [SerializeField] private Sprite weakIcon;
+        [SerializeField] private Sprite distortionIcon;
 
         [Header("Poison Text")]
         [SerializeField] private string poisonTitle = "Яд";
@@ -22,6 +25,18 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [Header("Weak Text")]
         [SerializeField] private string weakTitle = "Слабость";
         [SerializeField] private string weakDescription = "Урон атак снижен на 25%.";
+        
+        [Header("Distortion Text")]
+        [SerializeField] private string distortionTitle = "Искажение";
+        [SerializeField] private string distortionDescription = "Следующая разыгранная карта будет искажена сказкой.";
+        
+        private IDistortionService _distortionService;
+        
+        [Inject]
+        public void Construct(IDistortionService distortionService)
+        {
+            _distortionService = distortionService;
+        }
 
         public void Refresh(PlayerState player, EnemyState enemy)
         {
@@ -41,6 +56,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (player.Weak > 0)
                 Add(playerStatusRoot, weakIcon, player.Weak, weakTitle, weakDescription);
+            
+            if (_distortionService != null && _distortionService.HasForcedDistortion)
+                Add(playerStatusRoot, distortionIcon, 1, distortionTitle, distortionDescription);
         }
 
         private void RebuildEnemyStatuses(EnemyState enemy)

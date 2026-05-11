@@ -4,6 +4,11 @@ namespace RoadOfAsh.Scripts.Domain.Battle
     {
         Attack,
         Block,
-        Buff
+        Buff,
+        DistortNextCard,
+        ApplyWeakToPlayer,
+        ApplyPoisonToPlayer,
+        HealSelf,
+        CleanseSelf
     }
 }

@@ -18,9 +18,9 @@ MonoBehaviour:
   pattern:
   - Type: 1
     Value: 6
-  - Type: 2
-    Value: 1
   - Type: 0
     Value: 6
+  - Type: 7
+    Value: 0
   - Type: 0
-    Value: 8
+    Value: 9

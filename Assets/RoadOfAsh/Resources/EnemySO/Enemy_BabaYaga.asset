@@ -16,12 +16,16 @@ MonoBehaviour:
   maxHp: 85
   damage: 8
   pattern:
-  - Type: 2
-    Value: 1
+  - Type: 3
+    Value: 0
   - Type: 0
     Value: 8
+  - Type: 4
+    Value: 1
   - Type: 1
     Value: 8
+  - Type: 3
+    Value: 0
   - Type: 0
     Value: 12
   - Type: 0

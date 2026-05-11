@@ -5,6 +5,7 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
     public interface IDistortionService
     {
         int Understanding { get; }
+        bool HasForcedDistortion { get; }
  
         void GainUnderstanding();
         void ResetUnderstanding();

@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHp: 30
   damage: 4
   pattern:
-  - Type: 2
+  - Type: 4
     Value: 1
   - Type: 0
     Value: 5

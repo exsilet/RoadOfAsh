@@ -20,6 +20,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private string attackIntentFormat = "Намерение: атака {0}";
         [SerializeField] private string blockIntentFormat = "Намерение: защита {0}";
         [SerializeField] private string buffIntentText = "Намерение: усиление";
+        [SerializeField] private string distortIntentText = "Намерение: ведьмовство";
+        [SerializeField] private string applyWeakIntentFormat = "Намерение: слабость {0}";
+        [SerializeField] private string applyPoisonIntentFormat = "Намерение: яд {0}";
+        [SerializeField] private string healSelfIntentFormat = "Намерение: лечение {0}";
+        [SerializeField] private string cleanseSelfIntentText = "Намерение: очищение";
         [SerializeField] private string unknownIntentText = "Намерение: неизвестно";
 
         public void Refresh(PlayerState playerState, EnemyState enemy)
@@ -59,6 +64,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 EnemyIntentType.Attack => string.Format(attackIntentFormat, enemy.IntentValue),
                 EnemyIntentType.Block => string.Format(blockIntentFormat, enemy.IntentValue),
                 EnemyIntentType.Buff => buffIntentText,
+                EnemyIntentType.DistortNextCard => distortIntentText,
+                EnemyIntentType.ApplyWeakToPlayer => string.Format(applyWeakIntentFormat, enemy.IntentValue),
+                EnemyIntentType.ApplyPoisonToPlayer => string.Format(applyPoisonIntentFormat, enemy.IntentValue),
+                EnemyIntentType.HealSelf => string.Format(healSelfIntentFormat, enemy.IntentValue),
+                EnemyIntentType.CleanseSelf => cleanseSelfIntentText,
                 _ => unknownIntentText
             };
         }

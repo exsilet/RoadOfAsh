@@ -11,6 +11,10 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         event Action<int> OnPlayerDamaged;
         event Action<int> OnPlayerBlocked;
         event Action<int> OnEnemyPoisonTick;
+        event Action<int> OnPlayerPoisoned;
+        event Action<int> OnPlayerWeakened;
+        event Action<int> OnEnemyHealed;
+        event Action OnEnemyCleansed;
         bool IsBattleFinished { get; }
         bool PlayerWon { get; }
         EnemyState CurrentEnemy { get; }

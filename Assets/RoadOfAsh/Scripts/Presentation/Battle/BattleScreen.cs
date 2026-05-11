@@ -4,6 +4,7 @@ using DG.Tweening;
 using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Battle;
 using RoadOfAsh.Scripts.Domain.Cards;
+using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
@@ -57,10 +58,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private IMapService _mapService;
         private RunState _runState;
         private RewardService _rewardService;
+        private IDistortionService _distortionService;
 
         [Inject]
         public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState,
-            RewardService rewardService)
+            RewardService rewardService, IDistortionService distortionService)
         {
             _battleService = battleService;
             _cardService = cardService;
@@ -69,6 +71,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             _mapService = mapService;
             _runState = runState;
             _rewardService = rewardService;
+            _distortionService = distortionService;
         }
 
         private void Start()
@@ -217,7 +220,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             EnemyState enemy = _battleService.CurrentEnemy;
 
             if (battleHudView != null)
+            {
                 battleHudView.Refresh(_playerState, enemy);
+            }
 
             if (battleStatusView != null)
                 battleStatusView.Refresh(_playerState, enemy);

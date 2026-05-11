@@ -23,6 +23,10 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         public event Action<int> OnPlayerDamaged;
         public event Action<int> OnPlayerBlocked;
         public event Action<int> OnEnemyPoisonTick;
+        public event Action<int> OnPlayerPoisoned;
+        public event Action<int> OnPlayerWeakened;
+        public event Action<int> OnEnemyHealed;
+        public event Action OnEnemyCleansed;
 
         public bool IsBattleFinished => _finished;
         public bool PlayerWon => _playerWon;
@@ -88,8 +92,9 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             {
                 _enemy.Block = 0;
                 ExecuteEnemyIntent();
-                _enemy.TurnIndex++;
+                ApplyPoisonToPlayer();
                 
+                _enemy.TurnIndex++;
                 _enemy.Weak = 0;
             }
 
@@ -118,24 +123,19 @@ namespace RoadOfAsh.Scripts.Domain.Battle
                     case EffectType.Damage:
                         ApplyDamageToEnemy(effect.Value);
                         break;
-
                     case EffectType.Block:
                         _playerState.Block += effect.Value;
                         OnPlayerBlocked?.Invoke(effect.Value);
                         break;
-
                     case EffectType.Draw:
                         _cardService.Draw(effect.Value);
                         break;
-
                     case EffectType.ApplyWeak:
                         _enemy.Weak += effect.Value;
                         break;
-
                     case EffectType.ApplyPoison:
                         _enemy.Poison += effect.Value;
                         break;
-
                     case EffectType.GainEnergy:
                         _playerState.Energy += effect.Value;
                         break;
@@ -194,13 +194,29 @@ namespace RoadOfAsh.Scripts.Domain.Battle
                 case EnemyIntentType.Attack:
                     ApplyEnemyAttack(_enemy.IntentValue);
                     break;
-
                 case EnemyIntentType.Block:
                     _enemy.Block += _enemy.IntentValue;
                     break;
-
                 case EnemyIntentType.Buff:
                     _enemy.Weak = Mathf.Max(0, _enemy.Weak - _enemy.IntentValue);
+                    break;
+                case EnemyIntentType.DistortNextCard:
+                    _distortionService.ForceNextDistortion();
+                    break;
+                case EnemyIntentType.ApplyWeakToPlayer:
+                    ApplyWeakToPlayer(_enemy.IntentValue);
+                    break;
+                case EnemyIntentType.ApplyPoisonToPlayer:
+                    ApplyPoisonToPlayer(_enemy.IntentValue);
+                    break;
+                case EnemyIntentType.HealSelf:
+                    HealEnemy(_enemy.IntentValue);
+                    break;
+                case EnemyIntentType.CleanseSelf:
+                    CleanseEnemy();
+                    break;
+                default:
+                    Debug.LogWarning($"Unhandled enemy intent: {_enemy.IntentType}");
                     break;
             }
         }
@@ -255,6 +271,68 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         private void NotifyStateChanged()
         {
             OnBattleStateChanged?.Invoke();
+        }
+        
+        private void ApplyWeakToPlayer(int value)
+        {
+            if (value <= 0)
+                return;
+
+            _playerState.Weak += value;
+            OnPlayerWeakened?.Invoke(value);
+        }
+        
+        private void ApplyPoisonToPlayer(int value)
+        {
+            if (value <= 0)
+                return;
+
+            _playerState.Poison += value;
+            OnPlayerPoisoned?.Invoke(value);
+        }
+        
+        private void HealEnemy(int value)
+        {
+            if (value <= 0)
+                return;
+
+            int oldHp = _enemy.HP;
+            _enemy.HP = Mathf.Min(_enemy.MaxHP, _enemy.HP + value);
+
+            int healed = _enemy.HP - oldHp;
+
+            if (healed > 0)
+                OnEnemyHealed?.Invoke(healed);
+        }
+
+        private void CleanseEnemy()
+        {
+            bool hadStatuses = _enemy.Weak > 0 || _enemy.Poison > 0;
+
+            _enemy.Weak = 0;
+            _enemy.Poison = 0;
+
+            if (hadStatuses)
+                OnEnemyCleansed?.Invoke();
+        }
+        
+        private void ApplyPoisonToPlayer()
+        {
+            if (_playerState.Poison <= 0)
+                return;
+
+            int poisonDamage = _playerState.Poison;
+            _playerState.HP = Mathf.Max(0, _playerState.HP - poisonDamage);
+            OnPlayerDamaged?.Invoke(poisonDamage);
+
+            _playerState.Poison = Mathf.Max(0, _playerState.Poison - 1);
+
+            if (_playerState.HP <= 0)
+            {
+                _playerState.HP = 0;
+                _finished = true;
+                _playerWon = false;
+            }
         }
     }
 }

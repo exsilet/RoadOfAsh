@@ -11,6 +11,8 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
         public int Understanding { get; private set; }
  
         private bool _forceNext;
+        
+        public bool HasForcedDistortion => _forceNext;
  
         public void GainUnderstanding()
         {
