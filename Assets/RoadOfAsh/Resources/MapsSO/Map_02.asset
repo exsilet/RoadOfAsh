@@ -10,91 +10,91 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 854c40d47e5240c19381d5b9b905bdd4, type: 3}
-  m_Name: Map_01
+  m_Name: Map_02
   m_EditorClassIdentifier: 
   StartNodeId: 0
   Nodes:
   - Id: 0
     Type: 0
-    Position: {x: -505, y: 0}
+    Position: {x: -500, y: -320}
     NextNodeIds: 010000000200000003000000
     Enemy: {fileID: 0}
     Event: {fileID: 0}
   - Id: 1
     Type: 1
-    Position: {x: -308, y: 322}
+    Position: {x: -700, y: -120}
     NextNodeIds: 0400000005000000
     Enemy: {fileID: 11400000, guid: d197193f73f07a94488b4d72f9e6c657, type: 2}
     Event: {fileID: 0}
   - Id: 2
     Type: 2
-    Position: {x: -298, y: 32}
+    Position: {x: -500, y: -120}
     NextNodeIds: 0500000006000000
     Enemy: {fileID: 0}
     Event: {fileID: 11400000, guid: b98c1104a04f6894092639c126bafa65, type: 2}
   - Id: 3
     Type: 1
-    Position: {x: -307, y: -221}
+    Position: {x: -300, y: -120}
     NextNodeIds: 0500000006000000
     Enemy: {fileID: 11400000, guid: 73048906ffa0de247b9b97abd85b31a5, type: 2}
     Event: {fileID: 0}
   - Id: 4
     Type: 1
-    Position: {x: -83, y: 188}
+    Position: {x: -700, y: 80}
     NextNodeIds: 07000000
     Enemy: {fileID: 11400000, guid: caf43be13a5017b428cf3ca4298fda90, type: 2}
     Event: {fileID: 0}
   - Id: 5
     Type: 4
-    Position: {x: -82, y: -89}
+    Position: {x: -500, y: 80}
     NextNodeIds: 0700000008000000
     Enemy: {fileID: 0}
     Event: {fileID: 0}
   - Id: 6
     Type: 1
-    Position: {x: -97, y: -346}
+    Position: {x: -300, y: 80}
     NextNodeIds: 0800000009000000
-    Enemy: {fileID: 11400000, guid: 6f84abcaee5c8fa4d8cff06859c80e46, type: 2}
+    Enemy: {fileID: 11400000, guid: a56db7dce2e65a340af366b69db8110f, type: 2}
     Event: {fileID: 0}
   - Id: 7
     Type: 2
-    Position: {x: 168, y: 351}
+    Position: {x: -620, y: 260}
     NextNodeIds: 0a0000000b000000
     Enemy: {fileID: 0}
     Event: {fileID: 11400000, guid: b98c1104a04f6894092639c126bafa65, type: 2}
   - Id: 8
     Type: 1
-    Position: {x: 162, y: 20}
+    Position: {x: -400, y: 260}
     NextNodeIds: 0a0000000b000000
-    Enemy: {fileID: 11400000, guid: a56db7dce2e65a340af366b69db8110f, type: 2}
+    Enemy: {fileID: 11400000, guid: 6f84abcaee5c8fa4d8cff06859c80e46, type: 2}
     Event: {fileID: 0}
   - Id: 9
     Type: 5
-    Position: {x: 156, y: -202}
+    Position: {x: -180, y: 260}
     NextNodeIds: 0a0000000b000000
     Enemy: {fileID: 0}
     Event: {fileID: 0}
   - Id: 10
     Type: 6
-    Position: {x: 340, y: 213}
+    Position: {x: -500, y: 430}
     NextNodeIds: 0c000000
-    Enemy: {fileID: 11400000, guid: 711f73d498c30184887da15facc08f8b, type: 2}
+    Enemy: {fileID: 11400000, guid: 91dfecae9b9df5449840e4843f997b8f, type: 2}
     Event: {fileID: 0}
   - Id: 11
     Type: 3
-    Position: {x: 368, y: -266}
+    Position: {x: -200, y: 430}
     NextNodeIds: 0c000000
     Enemy: {fileID: 0}
     Event: {fileID: 0}
   - Id: 12
     Type: 4
-    Position: {x: 356, y: -16}
+    Position: {x: -350, y: 590}
     NextNodeIds: 0d000000
     Enemy: {fileID: 0}
     Event: {fileID: 0}
   - Id: 13
     Type: 7
-    Position: {x: 548.18, y: 0}
+    Position: {x: -350, y: 760}
     NextNodeIds: 
-    Enemy: {fileID: 11400000, guid: bd15f81598878a549a3c3a666fe17144, type: 2}
+    Enemy: {fileID: 11400000, guid: e2555b72690aa0744aaaccb470465f42, type: 2}
     Event: {fileID: 0}

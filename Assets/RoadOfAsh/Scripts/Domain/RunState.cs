@@ -20,5 +20,17 @@ namespace RoadOfAsh.Scripts.Domain
             SkippedRewards++;
             AddGold(15);
         }
+        
+        public bool SpendGold(int amount)
+        {
+            if (amount <= 0)
+                return false;
+
+            if (Gold < amount)
+                return false;
+
+            Gold -= amount;
+            return true;
+        }
     }
 }

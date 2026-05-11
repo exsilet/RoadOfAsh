@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using RoadOfAsh.Scripts.Domain;
+using RoadOfAsh.Scripts.Domain.Cards;
+using RoadOfAsh.Scripts.Domain.Events;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
+using RoadOfAsh.Scripts.Domain.Shop;
 using RoadOfAsh.Scripts.Presentation.Rewards;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,24 +21,28 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         [SerializeField] private CampfireView campfireView;
         [SerializeField] private float campfireHealPercent = 0.3f;
         [SerializeField] private RewardSelectionView rewardSelectionView;
+        [SerializeField] private EventView eventView;
         
         [SerializeField] private MapSO mapConfig;
+        [SerializeField] private MapShopFlow mapShopFlow;
         
         [Header("Scenes")]
         [SerializeField] private string battleSceneName = "BattleScene";
 
+        private ShopService _shopService;
         private IMapService _mapService;
         private PlayerState _playerState;
         private RewardService _rewardService;
         private RunState _runState;
 
         [Inject]
-        public void Construct(IMapService mapService, PlayerState playerState, RewardService rewardService, RunState runState)
+        public void Construct(IMapService mapService, PlayerState playerState, RewardService rewardService, RunState runState, ShopService shopService)
         {
             _mapService = mapService;
             _playerState = playerState;
             _rewardService = rewardService;
             _runState = runState;
+            _shopService = shopService;
         }
 
         private void Start()
@@ -77,9 +85,18 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                     OnTreasureRewardSelected,
                     OnTreasureRewardSkipped);
             }
+            
+            if (eventView != null)
+            {
+                eventView.Hide();
+                eventView.ChoiceClicked += OnEventChoiceClicked;
+            }
 
             if (_mapService.State == null)
                 _mapService.CreateNewMap(mapConfig);
+            
+            if (mapShopFlow != null)
+                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService);
 
             BuildMap();
         }
@@ -91,6 +108,9 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 campfireView.HealClicked -= OnCampfireHealClicked;
                 campfireView.CloseClicked -= OnCampfireCloseClicked;
             }
+            
+            if (eventView != null)
+                eventView.ChoiceClicked -= OnEventChoiceClicked;
         }
 
         private void BuildMap()
@@ -124,11 +144,11 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                     break;
 
                 case MapNodeType.Event:
-                    Debug.Log("Event пока не сделан");
+                    OpenEvent(selectedNode);
                     break;
 
                 case MapNodeType.Shop:
-                    Debug.Log("Shop пока не сделан");
+                    mapShopFlow.Open();
                     break;
 
                 case MapNodeType.Campfire:
@@ -220,6 +240,56 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (rewardSelectionView != null)
                 rewardSelectionView.Hide();
 
+            BuildMap();
+        }
+        
+        private void OpenEvent(MapNodeData node)
+        {
+            if (node == null || node.Event == null)
+            {
+                Debug.LogError("MapScreen: Event node has no EventSO.");
+                return;
+            }
+
+            if (eventView != null)
+                eventView.Show(node.Event);
+        }
+        
+        private void OnEventChoiceClicked(EventChoiceData choice)
+        {
+            if (choice == null)
+                return;
+            
+            if (choice.HpCost > 0)
+                _playerState.HP = Mathf.Max(1, _playerState.HP - choice.HpCost);
+
+            switch (choice.Type)
+            {
+                case EventChoiceType.None:
+                    break;
+
+                case EventChoiceType.GainGold:
+                    _runState.AddGold(choice.Amount);
+                    break;
+
+                case EventChoiceType.Heal:
+                    _playerState.Heal(choice.Amount);
+                    break;
+
+                case EventChoiceType.LoseHp:
+                    _playerState.HP = Mathf.Max(1, _playerState.HP - choice.Amount);
+                    break;
+
+                case EventChoiceType.GainCard:
+                    if (choice.Card != null)
+                        _playerState.Deck.Add(choice.Card);
+                    break;
+            }
+
+            if (eventView != null)
+                eventView.Hide();
+
+            _mapService.CompleteSelectedNode();
             BuildMap();
         }
     }

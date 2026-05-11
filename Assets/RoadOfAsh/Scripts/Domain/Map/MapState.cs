@@ -16,12 +16,7 @@ namespace RoadOfAsh.Scripts.Domain.Map
 
             foreach (MapNodeData node in nodes)
             {
-                Nodes.Add(new MapNodeData(
-                    node.Id,
-                    node.Type,
-                    node.Position,
-                    node.NextNodeIds,
-                    node.Enemy));
+                Nodes.Add(new MapNodeData(node.Id, node.Type, node.Position, node.NextNodeIds, node.Enemy, node.Event));
             }
         }
 

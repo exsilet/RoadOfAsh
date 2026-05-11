@@ -5,6 +5,7 @@ using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
+using RoadOfAsh.Scripts.Domain.Shop;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
@@ -40,6 +41,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.Register<IBattleService, BattleService>(Lifetime.Singleton);
             builder.Register<IMapService, MapService>(Lifetime.Singleton);
             builder.Register<RewardService>(Lifetime.Singleton);
+            builder.Register<ShopService>(Lifetime.Singleton);
         }
 
         public static void LoadScene(string sceneName)

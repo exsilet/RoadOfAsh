@@ -1,5 +1,6 @@
 using System;
 using RoadOfAsh.Scripts.Domain.Battle;
+using RoadOfAsh.Scripts.Domain.Events;
 using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Domain.Map
@@ -12,14 +13,16 @@ namespace RoadOfAsh.Scripts.Domain.Map
         public Vector2 Position;
         public int[] NextNodeIds;
         public EnemySO Enemy;
+        public EventSO Event;
 
-        public MapNodeData(int id, MapNodeType type, Vector2 position, int[] nextNodeIds, EnemySO enemy)
+        public MapNodeData(int id, MapNodeType type, Vector2 position, int[] nextNodeIds, EnemySO enemy, EventSO eventData)
         {
             Id = id;
             Type = type;
             Position = position;
             NextNodeIds = nextNodeIds;
             Enemy = enemy;
+            Event = eventData;
         }
     }
 }
