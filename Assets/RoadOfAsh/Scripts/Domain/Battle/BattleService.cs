@@ -18,6 +18,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         private bool _playerWon;
 
         public event Action OnBattleStateChanged;
+        public event Action OnPlayerTurnEnded;
         public event Action<CardSO, PlayedCardResult> OnCardPlayed;
         public event Action<int> OnEnemyDamaged;
         public event Action<int> OnPlayerDamaged;
@@ -78,6 +79,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             if (_enemy == null) return;
 
             _cardService.DiscardHand();
+            _playerState.Weak = Mathf.Max(0, _playerState.Weak - 1);
 
             ApplyPoisonToEnemy();
 
@@ -95,7 +97,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
                 ApplyPoisonToPlayer();
                 
                 _enemy.TurnIndex++;
-                _enemy.Weak = 0;
+                _enemy.Weak = Mathf.Max(0, _enemy.Weak - 1);
             }
 
             _playerState.Block = 0;
@@ -107,6 +109,9 @@ namespace RoadOfAsh.Scripts.Domain.Battle
                 RollEnemyIntent();
 
             NotifyStateChanged();
+            
+            if (!_finished)
+                OnPlayerTurnEnded?.Invoke();
         }
 
         private PlayedCardResult BuildCardResult(CardSO card)
@@ -148,8 +153,13 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             if (damage <= 0)
                 return;
 
-            int blockedDamage = Mathf.Min(_enemy.Block, damage);
-            int finalDamage = damage - blockedDamage;
+            int incomingDamage = damage;
+
+            if (_playerState.Weak > 0)
+                incomingDamage = Mathf.Max(0, Mathf.RoundToInt(incomingDamage * 0.75f));
+
+            int blockedDamage = Mathf.Min(_enemy.Block, incomingDamage);
+            int finalDamage = incomingDamage - blockedDamage;
 
             _enemy.Block -= blockedDamage;
             _enemy.HP -= finalDamage;
@@ -168,7 +178,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             _enemy.HP = Mathf.Max(0, _enemy.HP - poisonDamage);
             OnEnemyPoisonTick?.Invoke(poisonDamage);
 
-            _enemy.Poison = 0;
+            _enemy.Poison = Mathf.Max(0, _enemy.Poison - 1);
         }
         
         private void RollEnemyIntent()

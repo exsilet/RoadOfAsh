@@ -35,9 +35,14 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private RewardSelectionView rewardSelectionView;
 
         [Header("Battle Config")]
-        [SerializeField] private List<CardSO> startingDeck;
+        [SerializeField] private StarterDeckSO startingDeck;
         [SerializeField] private EnemySO tutorialEnemy;
         [SerializeField] private EnemySO fallbackEnemyConfig;
+        
+        [Header("Tutorial Cards")]
+        [SerializeField] private CardSO tutorialAttackCard;
+        [SerializeField] private CardSO tutorialBlockCard;
+        [SerializeField] private List<CardSO> tutorialExtraCards = new();
         
         [Header("Card Play Animation")]
         [SerializeField] private CardPlayAnimator cardPlayAnimator;
@@ -57,12 +62,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private IObjectResolver _resolver;
         private IMapService _mapService;
         private RunState _runState;
-        private RewardService _rewardService;
+        private IRewardService _rewardService;
         private IDistortionService _distortionService;
 
         [Inject]
         public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState,
-            RewardService rewardService, IDistortionService distortionService)
+            IRewardService rewardService, IDistortionService distortionService)
         {
             _battleService = battleService;
             _cardService = cardService;
@@ -88,7 +93,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
             }
 
-            if (startingDeck == null || startingDeck.Count == 0)
+            if (startingDeck == null || startingDeck.Cards == null || startingDeck.Cards.Count == 0)
             {
                 Debug.LogError("BattleScreen: startingDeck is empty.");
                 return;
@@ -123,10 +128,14 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 _battleService.OnEnemyCleansed += battleEffectsView.ShowEnemyCleanse;
             }
 
-            if (_playerState.Deck.Count == 0)
-                _playerState.Deck.AddRange(startingDeck);
-            
-            _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck));
+            bool isTutorialBattle = _runState != null && !_runState.IntroBattleCompleted;
+
+            List<CardSO> deckForBattle = isTutorialBattle ? BuildTutorialDeck() : BuildRegularBattleDeck();
+
+            _playerState.Deck.Clear();
+            _playerState.Deck.AddRange(deckForBattle);
+
+            _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck), !isTutorialBattle);
 
             EnemySO enemy = GetEnemyForBattle();
 
@@ -170,6 +179,14 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             }
         }
         
+        private List<CardSO> BuildRegularBattleDeck()
+        {
+            if (_playerState.Deck.Count > 0)
+                return new List<CardSO>(_playerState.Deck);
+
+            return new List<CardSO>(startingDeck.Cards);
+        }
+        
         private EnemySO GetEnemyForBattle()
         {
             if (_runState != null && !_runState.IntroBattleCompleted)
@@ -184,6 +201,41 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             }
 
             return fallbackEnemyConfig;
+        }
+        
+        private List<CardSO> BuildTutorialDeck()
+        {
+            List<CardSO> result = new();
+
+            if (tutorialAttackCard != null)
+                result.Add(tutorialAttackCard);
+
+            if (tutorialBlockCard != null)
+                result.Add(tutorialBlockCard);
+
+            foreach (CardSO card in tutorialExtraCards)
+            {
+                if (card == null)
+                    continue;
+
+                if (result.Contains(card))
+                    continue;
+
+                result.Add(card);
+            }
+
+            foreach (CardSO card in startingDeck.Cards)
+            {
+                if (card == null)
+                    continue;
+
+                if (result.Contains(card))
+                    continue;
+
+                result.Add(card);
+            }
+
+            return result;
         }
 
         private void OnEndTurnClicked()
@@ -329,6 +381,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
             }
 
+            if (!_runState.IntroBattleCompleted)
+            {
+                CompleteTutorialAndGoToMap();
+                return;
+            }
+
             if (IsSelectedBossNode())
             {
                 if (battleCompletionView != null)
@@ -340,6 +398,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             ShowRewardPanel();
         }
         
+        private void CompleteTutorialAndGoToMap()
+        {
+            _runState.IntroBattleCompleted = true;
+            RunLifetimeScope.LoadScene(mapSceneName);
+        }
+        
         private void RestartAfterDefeat()
         {
             _playerState.HP = Mathf.Max(1, Mathf.RoundToInt(_playerState.MaxHP * 0.5f));
@@ -347,6 +411,18 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             _playerState.Energy = 3;
             _playerState.Weak = 0;
             _playerState.Poison = 0;
+
+            _playerState.Hand.Clear();
+            _playerState.Discard.Clear();
+
+            bool isTutorialBattle = _runState != null && !_runState.IntroBattleCompleted;
+
+            List<CardSO> deckForBattle = isTutorialBattle ? BuildTutorialDeck() : new List<CardSO>(startingDeck.Cards);
+
+            _playerState.Deck.Clear();
+            _playerState.Deck.AddRange(deckForBattle);
+
+            _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck), !isTutorialBattle);
 
             RunLifetimeScope.LoadScene(battleSceneName);
         }
@@ -423,5 +499,48 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         {
             RunLifetimeScope.LoadScene(mainMenuSceneName);
         }
+        
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            ValidateTutorialCards();
+        }
+
+        private void ValidateTutorialCards()
+        {
+            if (tutorialAttackCard != null && tutorialAttackCard.CanAppearInRewards)
+            {
+                Debug.LogWarning(
+                    $"BattleScreen: tutorialAttackCard '{tutorialAttackCard.CardName}' выглядит как reward-карта. " +
+                    "Для обучения лучше использовать стартовую карту атаки.",
+                    this);
+            }
+
+            if (tutorialBlockCard != null && tutorialBlockCard.CanAppearInRewards)
+            {
+                Debug.LogWarning(
+                    $"BattleScreen: tutorialBlockCard '{tutorialBlockCard.CardName}' выглядит как reward-карта. " +
+                    "Для обучения лучше использовать стартовую карту блока.",
+                    this);
+            }
+
+            if (tutorialExtraCards == null)
+                return;
+
+            foreach (CardSO card in tutorialExtraCards)
+            {
+                if (card == null)
+                    continue;
+
+                if (card.CanAppearInRewards)
+                {
+                    Debug.LogWarning(
+                        $"BattleScreen: tutorialExtraCards содержит reward-карту '{card.CardName}'. " +
+                        "В обучении лучше использовать только стартовые карты.",
+                        this);
+                }
+            }
+        }
+#endif
     }
 }

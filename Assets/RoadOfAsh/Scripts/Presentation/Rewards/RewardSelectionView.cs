@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,13 +12,13 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
         [SerializeField] private Transform rewardRoot;
         [SerializeField] private RewardItemView rewardItemPrefab;
         [SerializeField] private Button skipButton;
-        [SerializeField] private List<CardSO> rewardPool;
+        [SerializeField] private RewardPoolSO rewardPool;
 
         [Header("Icons")]
         [SerializeField] private Sprite goldRewardIcon;
         [SerializeField] private Sprite healRewardIcon;
 
-        private RewardService _rewardService;
+        private IRewardService _rewardService;
         private Action<RewardItem> _onRewardSelected;
         private Action _onRewardSkipped;
 
@@ -29,7 +28,7 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
                 skipButton.onClick.RemoveListener(OnSkipClicked);
         }
 
-        public void Initialize(RewardService rewardService, Action<RewardItem> onRewardSelected, Action onRewardSkipped)
+        public void Initialize(IRewardService rewardService, Action<RewardItem> onRewardSelected, Action onRewardSkipped)
         {
             _rewardService = rewardService;
             _onRewardSelected = onRewardSelected;
@@ -68,7 +67,7 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
 
             ClearRewards();
 
-            if (_rewardService == null || rewardPool == null || rewardPool.Count == 0)
+            if (_rewardService == null || rewardPool == null)
             {
                 Debug.LogError("RewardSelectionView: reward service or reward pool is missing.");
                 return;

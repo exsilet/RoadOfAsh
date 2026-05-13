@@ -18,7 +18,7 @@ namespace RoadOfAsh.Scripts.Domain.Cards
             _playerState = playerState;
         }
 
-        public void InitializeDeck(List<CardSO> cards)
+        public void InitializeDeck(List<CardSO> deck, bool shuffle = true)
         {
             _deckBuffer.Clear();
             _handBuffer.Clear();
@@ -28,10 +28,14 @@ namespace RoadOfAsh.Scripts.Domain.Cards
             _playerState.Hand.Clear();
             _playerState.Discard.Clear();
 
-            _deckBuffer.AddRange(cards);
-            _playerState.Deck.AddRange(cards);
+            if (deck != null)
+            {
+                _deckBuffer.AddRange(deck);
+                _playerState.Deck.AddRange(deck);
+            }
 
-            ShuffleDeck();
+            if (shuffle)
+                ShuffleDeck();
         }
 
         public void ShuffleDeck()
@@ -61,7 +65,7 @@ namespace RoadOfAsh.Scripts.Domain.Cards
                     ShuffleDeck();
                 }
 
-                var card = _deckBuffer[0];
+                CardSO card = _deckBuffer[0];
                 _deckBuffer.RemoveAt(0);
 
                 _handBuffer.Add(card);
@@ -103,7 +107,7 @@ namespace RoadOfAsh.Scripts.Domain.Cards
         {
             for (int i = _handBuffer.Count - 1; i >= 0; i--)
             {
-                var card = _handBuffer[i];
+                CardSO card = _handBuffer[i];
                 _discardBuffer.Add(card);
                 _playerState.Discard.Add(card);
             }

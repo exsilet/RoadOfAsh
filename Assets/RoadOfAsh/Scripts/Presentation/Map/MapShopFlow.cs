@@ -3,6 +3,7 @@ using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Domain.Shop;
 using UnityEngine;
 
@@ -11,17 +12,16 @@ namespace RoadOfAsh.Scripts.Presentation.Map
     public class MapShopFlow : MonoBehaviour
     {
         [SerializeField] private ShopView shopView;
-        [SerializeField] private List<CardSO> shopCardPool;
+        [SerializeField] private RewardPoolSO rewardPool;
         [SerializeField] private int rerollCost = 15;
 
         private IMapService _mapService;
         private PlayerState _playerState;
         private RunState _runState;
-        private ShopService _shopService;
-
+        private IShopService _shopService;
         private List<ShopItemData> _currentItems = new();
 
-        public void Initialize(IMapService mapService, PlayerState playerState, RunState runState, ShopService shopService)
+        public void Initialize(IMapService mapService, PlayerState playerState, RunState runState, IShopService shopService)
         {
             _mapService = mapService;
             _playerState = playerState;
@@ -34,7 +34,13 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
         public void Open()
         {
-            _currentItems = _shopService.GenerateShop(shopCardPool);
+            if (_shopService == null || rewardPool == null)
+            {
+                Debug.LogError("MapShopFlow: shop service or reward pool is missing.");
+                return;
+            }
+
+            _currentItems = _shopService.GenerateShop(rewardPool);
 
             if (shopView != null)
                 shopView.Show(_currentItems, _runState.Gold);
@@ -51,7 +57,8 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             _playerState.Deck.Add(item.Card);
             _currentItems.Remove(item);
 
-            shopView.Refresh(_currentItems, _runState.Gold);
+            if (shopView != null)
+                shopView.Refresh(_currentItems, _runState.Gold);
         }
 
         private void OnRerollClicked()
@@ -59,8 +66,10 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (!_runState.SpendGold(rerollCost))
                 return;
 
-            _currentItems = _shopService.GenerateShop(shopCardPool);
-            shopView.Refresh(_currentItems, _runState.Gold);
+            _currentItems = _shopService.GenerateShop(rewardPool);
+
+            if (shopView != null)
+                shopView.Refresh(_currentItems, _runState.Gold);
         }
     }
 }

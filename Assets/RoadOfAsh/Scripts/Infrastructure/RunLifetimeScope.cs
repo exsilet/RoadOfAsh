@@ -40,8 +40,8 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.Register<IDistortionService, DistortionService>(Lifetime.Singleton);
             builder.Register<IBattleService, BattleService>(Lifetime.Singleton);
             builder.Register<IMapService, MapService>(Lifetime.Singleton);
-            builder.Register<RewardService>(Lifetime.Singleton);
-            builder.Register<ShopService>(Lifetime.Singleton);
+            builder.Register<RewardService>(Lifetime.Singleton).As<IRewardService>();
+            builder.Register<ShopService>(Lifetime.Singleton).As<IShopService>();
         }
 
         public static void LoadScene(string sceneName)

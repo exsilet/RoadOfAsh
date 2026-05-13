@@ -6,6 +6,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
     public interface IBattleService
     {
         event Action OnBattleStateChanged;
+        event Action OnPlayerTurnEnded;
         event Action<CardSO, PlayedCardResult> OnCardPlayed;
         event Action<int> OnEnemyDamaged;
         event Action<int> OnPlayerDamaged;

@@ -11,45 +11,15 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         [SerializeField] private GameObject panel;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text descriptionText;
-
-        [SerializeField] private Button firstChoiceButton;
-        [SerializeField] private TMP_Text firstChoiceTitleText;
-        [SerializeField] private TMP_Text firstChoiceDescriptionText;
-
-        [SerializeField] private Button secondChoiceButton;
-        [SerializeField] private TMP_Text secondChoiceTitleText;
-        [SerializeField] private TMP_Text secondChoiceDescriptionText;
-
-        private EventChoiceData[] _choices;
+        [SerializeField] private Transform choicesRoot;
+        [SerializeField] private EventChoiceView choicePrefab;
 
         public event Action<EventChoiceData> ChoiceClicked;
-
-        private void Awake()
-        {
-            Hide();
-
-            if (firstChoiceButton != null)
-                firstChoiceButton.onClick.AddListener(() => SelectChoice(0));
-
-            if (secondChoiceButton != null)
-                secondChoiceButton.onClick.AddListener(() => SelectChoice(1));
-        }
-
-        private void OnDestroy()
-        {
-            if (firstChoiceButton != null)
-                firstChoiceButton.onClick.RemoveAllListeners();
-
-            if (secondChoiceButton != null)
-                secondChoiceButton.onClick.RemoveAllListeners();
-        }
 
         public void Show(EventSO eventData)
         {
             if (eventData == null)
                 return;
-
-            _choices = eventData.Choices;
 
             if (panel != null)
                 panel.SetActive(true);
@@ -60,41 +30,46 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (descriptionText != null)
                 descriptionText.text = eventData.Description;
 
-            SetupChoice(0, firstChoiceButton, firstChoiceTitleText, firstChoiceDescriptionText);
-            SetupChoice(1, secondChoiceButton, secondChoiceTitleText, secondChoiceDescriptionText);
+            RebuildChoices(eventData.Choices);
         }
 
         public void Hide()
         {
             if (panel != null)
                 panel.SetActive(false);
+
+            ClearChoices();
         }
 
-        private void SetupChoice(int index, Button button, TMP_Text titleText, TMP_Text descriptionText)
+        private void RebuildChoices(EventChoiceData[] choices)
         {
-            bool hasChoice = _choices != null && index < _choices.Length && _choices[index] != null;
+            ClearChoices();
 
-            if (button != null)
-                button.gameObject.SetActive(hasChoice);
-
-            if (!hasChoice)
+            if (choicesRoot == null || choicePrefab == null || choices == null)
                 return;
 
-            EventChoiceData choice = _choices[index];
+            foreach (EventChoiceData choice in choices)
+            {
+                if (choice == null)
+                    continue;
 
-            if (titleText != null)
-                titleText.text = choice.Title;
-
-            if (descriptionText != null)
-                descriptionText.text = choice.Description;
+                EventChoiceView view = Instantiate(choicePrefab, choicesRoot);
+                view.Setup(choice, OnChoiceClicked);
+            }
         }
 
-        private void SelectChoice(int index)
+        private void ClearChoices()
         {
-            if (_choices == null || index >= _choices.Length)
+            if (choicesRoot == null)
                 return;
 
-            ChoiceClicked?.Invoke(_choices[index]);
+            foreach (Transform child in choicesRoot)
+                Destroy(child.gameObject);
+        }
+
+        private void OnChoiceClicked(EventChoiceData choice)
+        {
+            ChoiceClicked?.Invoke(choice);
         }
     }
 }

@@ -6,6 +6,7 @@ using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Domain.Shop;
+using RoadOfAsh.Scripts.Infrastructure;
 using RoadOfAsh.Scripts.Presentation.Rewards;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -29,14 +30,14 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         [Header("Scenes")]
         [SerializeField] private string battleSceneName = "BattleScene";
 
-        private ShopService _shopService;
-        private IMapService _mapService;
         private PlayerState _playerState;
-        private RewardService _rewardService;
         private RunState _runState;
+        private IShopService _shopService;
+        private IMapService _mapService;
+        private IRewardService _rewardService;
 
         [Inject]
-        public void Construct(IMapService mapService, PlayerState playerState, RewardService rewardService, RunState runState, ShopService shopService)
+        public void Construct(IMapService mapService, PlayerState playerState, IRewardService rewardService, RunState runState, IShopService shopService)
         {
             _mapService = mapService;
             _playerState = playerState;
@@ -140,7 +141,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 case MapNodeType.Battle:
                 case MapNodeType.EliteBattle:
                 case MapNodeType.Boss:
-                    SceneManager.LoadScene(battleSceneName);
+                    RunLifetimeScope.LoadScene(battleSceneName);
                     break;
 
                 case MapNodeType.Event:

@@ -4,7 +4,7 @@ namespace RoadOfAsh.Scripts.Domain.Cards
 {
     public interface ICardService
     {
-        void InitializeDeck(List<CardSO> cards);
+        void InitializeDeck(List<CardSO> deck, bool shuffle = true);
         void ShuffleDeck();
         void Draw(int count);
         bool TryPlayCard(CardSO card);

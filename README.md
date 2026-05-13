@@ -1,3 +1,18 @@
+Сделано:
+- TutorialBattleFlow
+- TutorialPanelView
+- TutorialHighlightView
+- обучение реагирует на сыгранную атаку / блок / конец хода
+- кнопка конца хода блокируется до нужного шага
+- tutorial-панель заработала через VContainer Auto Inject
+- подсветка UI подстраивается через canvas/world corners
+- tutorial-колода фиксированная: атака + блок приходят сразу
+- CardService.InitializeDeck(deck, shuffle)
+- StarterDeckSO для стартовой колоды
+- RewardPoolSO для пула наград
+- проверки OnValidate для неправильных карт
+- BattleScreen переведён на StarterDeckSO
+
 RoadOfAsh — текущий блок работ
 
 Сделано:

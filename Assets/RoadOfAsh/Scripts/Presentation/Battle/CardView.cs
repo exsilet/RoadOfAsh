@@ -30,13 +30,6 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private Action<CardView, CardSO> _onClicked;
         private CardSO _card;
-        private IBattleService _battleService;
-
-        [Inject]
-        public void Construct(IBattleService battleService)
-        {
-            _battleService = battleService;
-        }
 
         public void Setup(CardSO card, bool isCorrupted = false, Action<CardView, CardSO> onClicked = null)
         {

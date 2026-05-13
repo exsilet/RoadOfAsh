@@ -1,13 +1,12 @@
 using RoadOfAsh.Scripts.Domain;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using VContainer;
 
 namespace RoadOfAsh.Scripts.Infrastructure
 {
     public class Bootstrapper : MonoBehaviour
     {
-        [SerializeField] private string introBattleSceneName = "BattleScene";
+        [SerializeField] private string tutorialSceneName = "TutorialBattleScene";
         [SerializeField] private string mapSceneName = "MapScene";
 
         private RunState _runState;
@@ -28,7 +27,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
 
             string targetScene = _runState.IntroBattleCompleted
                 ? mapSceneName
-                : introBattleSceneName;
+                : tutorialSceneName;
 
             RunLifetimeScope.LoadScene(targetScene);
         }

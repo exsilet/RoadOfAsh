@@ -11,8 +11,14 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         public void Setup(EnemyState enemy)
         {
-            nameText.text = enemy.Name;
-            hpText.text = $"HP: {enemy.HP}/{enemy.MaxHP}";
+            if (enemy == null)
+                return;
+
+            if (nameText != null)
+                nameText.text = enemy.Name;
+
+            if (hpText != null)
+                hpText.text = $"HP: {enemy.HP}/{enemy.MaxHP}";
         }
     }
 }

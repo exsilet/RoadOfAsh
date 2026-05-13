@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Domain.Rewards
 {
-    public class RewardService
+    public class RewardService : IRewardService
     {
         private const float RareChance = 0.12f;
         private const float UncommonChance = 0.38f;
@@ -119,6 +119,22 @@ namespace RoadOfAsh.Scripts.Domain.Rewards
                 return null;
 
             return pool[Random.Range(0, pool.Count)];
+        }
+        
+        public List<CardSO> GenerateCardRewards(RewardPoolSO rewardPool, int count)
+        {
+            if (rewardPool == null)
+                return new List<CardSO>();
+
+            return GenerateCardRewards(new List<CardSO>(rewardPool.Cards), count);
+        }
+
+        public List<RewardItem> GenerateBattleRewards(RewardPoolSO rewardPool)
+        {
+            if (rewardPool == null)
+                return new List<RewardItem>();
+
+            return GenerateBattleRewards(new List<CardSO>(rewardPool.Cards));
         }
     }
 }
