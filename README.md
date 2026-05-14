@@ -387,6 +387,7 @@ Infrastructure
 - LifetimeScope
 - загрузка сцен
 - DI
+```text
 
 Используется:
 - Unity
