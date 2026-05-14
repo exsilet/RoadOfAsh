@@ -387,7 +387,7 @@ Infrastructure
 - LifetimeScope
 - загрузка сцен
 - DI
-```text
+```bash
 
 ## Технологии
 
