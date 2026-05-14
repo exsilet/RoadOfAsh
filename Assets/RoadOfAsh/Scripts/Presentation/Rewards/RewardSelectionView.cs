@@ -50,11 +50,44 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
 
             BuildRewards();
         }
-
+        
         public void Hide()
         {
             if (panel != null)
                 panel.SetActive(false);
+        }
+        
+        public void ShowFixed(List<RewardItem> rewards)
+        {
+            if (panel != null)
+                panel.SetActive(true);
+
+            BuildFixedRewards(rewards);
+        }
+        
+        private void BuildFixedRewards(List<RewardItem> rewards)
+        {
+            if (rewardRoot == null || rewardItemPrefab == null)
+            {
+                Debug.LogError("RewardSelectionView: rewardRoot or rewardItemPrefab is not assigned.");
+                return;
+            }
+
+            ClearRewards();
+
+            if (rewards == null || rewards.Count == 0)
+            {
+                Debug.LogError("RewardSelectionView: fixed rewards list is empty.");
+                return;
+            }
+
+            rewards = AddIcons(rewards);
+
+            foreach (RewardItem reward in rewards)
+            {
+                RewardItemView view = Instantiate(rewardItemPrefab, rewardRoot);
+                view.Setup(reward, OnRewardClicked);
+            }
         }
 
         private void BuildRewards()

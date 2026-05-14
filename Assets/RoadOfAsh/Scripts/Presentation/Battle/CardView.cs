@@ -30,6 +30,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private Action<CardView, CardSO> _onClicked;
         private CardSO _card;
+        
+        public CardSO Card => _card;
 
         public void Setup(CardSO card, bool isCorrupted = false, Action<CardView, CardSO> onClicked = null)
         {

@@ -10,6 +10,7 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
         void GainUnderstanding();
         void ResetUnderstanding();
         void ForceNextDistortion();
+        void SetRandomDistortionEnabled(bool enabled);
  
         bool RollDistortion(CardSO card);
         PlayedCardResult Resolve(CardSO card);

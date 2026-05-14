@@ -60,5 +60,38 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (handLayoutController != null)
                 handLayoutController.Rebuild();
         }
+        
+        public RectTransform FindFirstCardWithEffect(EffectType effectType)
+        {
+            if (handRoot == null)
+                return null;
+
+            for (int i = 0; i < handRoot.childCount; i++)
+            {
+                CardView cardView = handRoot.GetChild(i).GetComponent<CardView>();
+
+                if (cardView == null || cardView.Card == null)
+                    continue;
+
+                if (HasEffect(cardView.Card, effectType))
+                    return cardView.transform as RectTransform;
+            }
+
+            return null;
+        }
+
+        private bool HasEffect(CardSO card, EffectType effectType)
+        {
+            if (card.Effects == null)
+                return false;
+
+            foreach (CardEffect effect in card.Effects)
+            {
+                if (effect.Type == effectType)
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

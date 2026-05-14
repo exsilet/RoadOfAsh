@@ -10,6 +10,7 @@ using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Infrastructure;
 using RoadOfAsh.Scripts.Presentation.Rewards;
+using RoadOfAsh.Scripts.Presentation.Tutorial;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -22,6 +23,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private Button endTurnButton;
         [SerializeField] private HandView handView;
         [SerializeField] private BattleHudView battleHudView;
+        
+        [SerializeField] private UnderstandingView understandingView;
+        [SerializeField] private StatusTooltipSystem tooltipSystem;
 
         [Header("Battle Result UI")]
         [SerializeField] private BattleCompletionView battleCompletionView;
@@ -33,6 +37,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         [Header("Reward UI")]
         [SerializeField] private RewardSelectionView rewardSelectionView;
+        
+        [Header("Tutorial")]
+        [SerializeField] private TutorialBattleFlow tutorialBattleFlow;
 
         [Header("Battle Config")]
         [SerializeField] private StarterDeckSO startingDeck;
@@ -44,6 +51,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private CardSO tutorialBlockCard;
         [SerializeField] private List<CardSO> tutorialExtraCards = new();
         
+        [Header("Tutorial Reward")]
+        [SerializeField] private bool showTutorialReward = true;
+        [SerializeField] private CardSO tutorialRewardCard;
+        
         [Header("Card Play Animation")]
         [SerializeField] private CardPlayAnimator cardPlayAnimator;
 
@@ -51,7 +62,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private string mainMenuSceneName = "MainMenu";
         [SerializeField] private string mapSceneName = "MapScene";
         [SerializeField] private string battleSceneName = "BattleScene";
-
+        
+        private int _understandingBeforeBattle;
+        
         private bool _isCardAnimating;
         private bool _rewardShown;
         private bool _finishShown;
@@ -144,6 +157,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 Debug.LogError("BattleScreen: enemy config is not assigned.");
                 return;
             }
+            
+            _understandingBeforeBattle = _distortionService?.Understanding ?? 0;
 
             _battleService.StartBattle(enemy.CreateState());
         }
@@ -243,6 +258,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (_isCardAnimating)
                 return;
 
+            if (tutorialBattleFlow != null && !tutorialBattleFlow.CanEndTurn())
+            {
+                ShakeEndTurnButton();
+                return;
+            }
+
             StartCoroutine(EndTurnRoutine());
         }
 
@@ -282,18 +303,22 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             EnemyState enemy = _battleService.CurrentEnemy;
 
             if (battleHudView != null)
-            {
                 battleHudView.Refresh(_playerState, enemy);
-            }
 
             if (battleStatusView != null)
                 battleStatusView.Refresh(_playerState, enemy);
+
+            if (understandingView != null && _distortionService != null)
+                understandingView.Refresh(_distortionService.Understanding, DistortionService.MaxUnderstanding);
         }
 
         private void RefreshButtons()
         {
             if (endTurnButton != null)
-                endTurnButton.interactable = !_battleService.IsBattleFinished && !_isCardAnimating;
+            {
+                bool canEndTurn = !_battleService.IsBattleFinished && !_isCardAnimating && (tutorialBattleFlow == null || tutorialBattleFlow.CanEndTurn());
+                endTurnButton.interactable = canEndTurn;
+            }
 
             if (battleCompletionView != null)
                 battleCompletionView.SetContinueInteractable(_battleService.IsBattleFinished);
@@ -315,6 +340,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
 
             _finishShown = true;
+            
+            if (_battleService.PlayerWon && understandingView != null && _distortionService != null) 
+                understandingView.PlayGain(_understandingBeforeBattle, _distortionService.Understanding, DistortionService.MaxUnderstanding);
 
             if (battleCompletionView != null)
                 battleCompletionView.ShowBattleResult(_battleService.PlayerWon);
@@ -330,6 +358,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (cardView == null || card == null)
                 return;
+
+            if (tutorialBattleFlow != null && !tutorialBattleFlow.CanPlayCard(card))
+            {
+                ShowWrongTutorialCard(cardView);
+                return;
+            }
 
             if (_playerState.Energy < card.Cost)
             {
@@ -352,6 +386,31 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (cardResultView != null)
                 cardResultView.ShowNotEnoughEnergy();
+        }
+        
+        private void ShowWrongTutorialCard(CardView cardView)
+        {
+            RectTransform rect = cardView.GetComponent<RectTransform>();
+
+            if (rect != null)
+            {
+                rect.DOKill();
+                rect.DOShakeAnchorPos(0.25f, new Vector2(14f, 0f), 10, 90f);
+            }
+        }
+        
+        private void ShakeEndTurnButton()
+        {
+            if (endTurnButton == null)
+                return;
+
+            RectTransform rect = endTurnButton.GetComponent<RectTransform>();
+
+            if (rect == null)
+                return;
+
+            rect.DOKill();
+            rect.DOShakeAnchorPos(0.25f, new Vector2(14f, 0f), 10, 90f);
         }
 
         private IEnumerator PlayCardWithDiscardAnimation(CardView cardView, CardSO card)
@@ -383,7 +442,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (!_runState.IntroBattleCompleted)
             {
-                CompleteTutorialAndGoToMap();
+                if (showTutorialReward && tutorialRewardCard != null)
+                    ShowTutorialRewardPanel();
+                else
+                    CompleteTutorialAndGoToMap();
+
                 return;
             }
 
@@ -400,6 +463,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         
         private void CompleteTutorialAndGoToMap()
         {
+            _distortionService.SetRandomDistortionEnabled(true);
+            _distortionService.ResetUnderstanding();
+
             _runState.IntroBattleCompleted = true;
             RunLifetimeScope.LoadScene(mapSceneName);
         }
@@ -440,6 +506,30 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (rewardSelectionView != null)
                 rewardSelectionView.Show();
         }
+        
+        private void ShowTutorialRewardPanel()
+        {
+            if (_rewardShown)
+                return;
+
+            _rewardShown = true;
+
+            if (battleCompletionView != null)
+                battleCompletionView.HideAll();
+
+            if (rewardSelectionView == null)
+            {
+                CompleteTutorialAndGoToMap();
+                return;
+            }
+
+            List<RewardItem> rewards = new()
+            {
+                new RewardItem(RewardType.Card, tutorialRewardCard)
+            };
+
+            rewardSelectionView.ShowFixed(rewards);
+        }
 
         private void OnRewardSelected(RewardItem reward)
         {
@@ -479,6 +569,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             }
             else
             {
+                _distortionService.SetRandomDistortionEnabled(true);
+                _distortionService.ResetUnderstanding();
                 _runState.IntroBattleCompleted = true;
             }
 

@@ -9,6 +9,9 @@ namespace RoadOfAsh.Scripts.Domain.Battle
 {
     public class BattleService : IBattleService
     {
+        private const float EnemyHpBonusPerUnderstanding = 0.03f;
+        private const float EnemyIntentBonusPerUnderstanding = 0.02f;
+        
         private readonly PlayerState _playerState;
         private readonly ICardService _cardService;
         private readonly IDistortionService _distortionService;
@@ -46,6 +49,8 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             _finished = false;
             _playerWon = false;
 
+            ApplyUnderstandingDifficultyScaling();
+
             _playerState.Block = 0;
             _playerState.Energy = 3;
             _playerState.Weak = 0;
@@ -55,6 +60,26 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             _cardService.Draw(5);
             RollEnemyIntent();
             NotifyStateChanged();
+        }
+        
+        private void ApplyUnderstandingDifficultyScaling()
+        {
+            if (_enemy == null || _distortionService == null)
+                return;
+
+            int understanding = _distortionService.Understanding;
+
+            if (understanding <= 0)
+                return;
+
+            float hpMultiplier = 1f + understanding * EnemyHpBonusPerUnderstanding;
+
+            int oldMaxHp = _enemy.MaxHP;
+            int newMaxHp = Mathf.Max(1, Mathf.RoundToInt(oldMaxHp * hpMultiplier));
+            int hpBonus = newMaxHp - oldMaxHp;
+
+            _enemy.MaxHP = newMaxHp;
+            _enemy.HP = Mathf.Min(newMaxHp, _enemy.HP + hpBonus);
         }
 
         public bool TryPlayCard(CardSO card)
@@ -202,10 +227,13 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             switch (_enemy.IntentType)
             {
                 case EnemyIntentType.Attack:
-                    ApplyEnemyAttack(_enemy.IntentValue);
+                    ApplyEnemyAttack(ScaleEnemyIntentValue(_enemy.IntentValue));
                     break;
                 case EnemyIntentType.Block:
-                    _enemy.Block += _enemy.IntentValue;
+                    _enemy.Block += ScaleEnemyIntentValue(_enemy.IntentValue);
+                    break;
+                case EnemyIntentType.HealSelf:
+                    HealEnemy(ScaleEnemyIntentValue(_enemy.IntentValue));
                     break;
                 case EnemyIntentType.Buff:
                     _enemy.Weak = Mathf.Max(0, _enemy.Weak - _enemy.IntentValue);
@@ -218,9 +246,6 @@ namespace RoadOfAsh.Scripts.Domain.Battle
                     break;
                 case EnemyIntentType.ApplyPoisonToPlayer:
                     ApplyPoisonToPlayer(_enemy.IntentValue);
-                    break;
-                case EnemyIntentType.HealSelf:
-                    HealEnemy(_enemy.IntentValue);
                     break;
                 case EnemyIntentType.CleanseSelf:
                     CleanseEnemy();
@@ -343,6 +368,21 @@ namespace RoadOfAsh.Scripts.Domain.Battle
                 _finished = true;
                 _playerWon = false;
             }
+        }
+        
+        private int ScaleEnemyIntentValue(int value)
+        {
+            if (value <= 0 || _distortionService == null)
+                return value;
+
+            int understanding = _distortionService.Understanding;
+
+            if (understanding <= 0)
+                return value;
+
+            float multiplier = 1f + understanding * EnemyIntentBonusPerUnderstanding;
+
+            return Mathf.Max(1, Mathf.RoundToInt(value * multiplier));
         }
     }
 }
