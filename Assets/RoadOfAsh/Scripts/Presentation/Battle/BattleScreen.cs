@@ -7,8 +7,10 @@ using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Infrastructure;
+using RoadOfAsh.Scripts.Presentation.Relics;
 using RoadOfAsh.Scripts.Presentation.Rewards;
 using RoadOfAsh.Scripts.Presentation.Tutorial;
 using UnityEngine;
@@ -19,6 +21,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 {
     public class BattleScreen : MonoBehaviour
     {
+        private readonly List<RelicSO> _relicsAtBattleStart = new();
+        
         [Header("UI")]
         [SerializeField] private Button endTurnButton;
         [SerializeField] private HandView handView;
@@ -26,17 +30,18 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         
         [SerializeField] private UnderstandingView understandingView;
         [SerializeField] private StatusTooltipSystem tooltipSystem;
+        [SerializeField] private RelicBarView relicBarView;
 
         [Header("Battle Result UI")]
-        [SerializeField] private BattleCompletionView battleCompletionView;
         [SerializeField] private BattleEffectsView battleEffectsView;
         [SerializeField] private BattleStatusView battleStatusView;
 
         [Header("Card Result UI")]
         [SerializeField] private CardResultView cardResultView;
-
-        [Header("Reward UI")]
-        [SerializeField] private RewardSelectionView rewardSelectionView;
+        
+        [Header("Debug Relics")]
+        [SerializeField] private bool addDebugRelic;
+        [SerializeField] private RelicSO debugRelic;
         
         [Header("Tutorial")]
         [SerializeField] private TutorialBattleFlow tutorialBattleFlow;
@@ -46,14 +51,16 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private EnemySO tutorialEnemy;
         [SerializeField] private EnemySO fallbackEnemyConfig;
         
+        [Header("Reward Flow")]
+        [SerializeField] private BattleRewardFlow battleRewardFlow;
+        
+        [Header("Result Flow")]
+        [SerializeField] private BattleResultFlow battleResultFlow;
+        
         [Header("Tutorial Cards")]
         [SerializeField] private CardSO tutorialAttackCard;
         [SerializeField] private CardSO tutorialBlockCard;
         [SerializeField] private List<CardSO> tutorialExtraCards = new();
-        
-        [Header("Tutorial Reward")]
-        [SerializeField] private bool showTutorialReward = true;
-        [SerializeField] private CardSO tutorialRewardCard;
         
         [Header("Card Play Animation")]
         [SerializeField] private CardPlayAnimator cardPlayAnimator;
@@ -67,7 +74,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         
         private bool _isCardAnimating;
         private bool _rewardShown;
-        private bool _finishShown;
+        private bool _understandingGainShown;
 
         private IBattleService _battleService;
         private ICardService _cardService;
@@ -77,10 +84,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private RunState _runState;
         private IRewardService _rewardService;
         private IDistortionService _distortionService;
+        private IRelicService _relicService;
 
         [Inject]
         public void Construct(IBattleService battleService, ICardService cardService, PlayerState playerState, IObjectResolver resolver, IMapService mapService, RunState runState,
-            IRewardService rewardService, IDistortionService distortionService)
+            IRewardService rewardService, IDistortionService distortionService, IRelicService relicService)
         {
             _battleService = battleService;
             _cardService = cardService;
@@ -89,13 +97,17 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             _mapService = mapService;
             _runState = runState;
             _rewardService = rewardService;
+            _relicService = relicService;
             _distortionService = distortionService;
         }
 
         private void Start()
         {
-            if (rewardSelectionView != null)
-                rewardSelectionView.Initialize(_rewardService, OnRewardSelected, OnSkipRewardClicked);
+            if (battleRewardFlow != null)
+            {
+                battleRewardFlow.Initialize(_playerState, _runState, _relicService, _rewardService);
+                battleRewardFlow.Completed += OnRewardFlowCompleted;
+            }
             
             if (cardResultView != null)
                 cardResultView.HideInstant();
@@ -112,14 +124,17 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
             }
             
+            if (addDebugRelic && debugRelic != null && !_playerState.Relics.Contains(debugRelic))
+                _playerState.Relics.Add(debugRelic);
+            
             if (handView != null)
                 handView.Initialize(_resolver, OnCardViewClicked);
             
-            if (battleCompletionView != null)
+            if (battleResultFlow  != null)
             {
-                battleCompletionView.HideAll();
-                battleCompletionView.ContinueClicked += OnContinueClicked;
-                battleCompletionView.RestartRunClicked += OnRestartRunClicked;
+                battleResultFlow.Initialize();
+                battleResultFlow.ContinueClicked += OnContinueClicked;
+                battleResultFlow.RestartRunClicked += OnRestartRunClicked;
             }
 
             if (endTurnButton != null)
@@ -140,6 +155,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 _battleService.OnEnemyHealed += battleEffectsView.ShowEnemyHeal;
                 _battleService.OnEnemyCleansed += battleEffectsView.ShowEnemyCleanse;
             }
+            
+            if (_relicService != null)
+                _relicService.RelicActivated += OnRelicActivated;
 
             bool isTutorialBattle = _runState != null && !_runState.IntroBattleCompleted;
 
@@ -159,19 +177,24 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             }
             
             _understandingBeforeBattle = _distortionService?.Understanding ?? 0;
-
+            
+            CacheRelicsAtBattleStart();
             _battleService.StartBattle(enemy.CreateState());
         }
 
         private void OnDestroy()
         {
+            if (battleRewardFlow != null)
+                battleRewardFlow.Completed -= OnRewardFlowCompleted;
+            
             if (endTurnButton != null)
                 endTurnButton.onClick.RemoveListener(OnEndTurnClicked);
 
-            if (battleCompletionView != null)
+            if (battleResultFlow != null)
             {
-                battleCompletionView.ContinueClicked -= OnContinueClicked;
-                battleCompletionView.RestartRunClicked -= OnRestartRunClicked;
+                battleResultFlow.ContinueClicked -= OnContinueClicked;
+                battleResultFlow.RestartRunClicked -= OnRestartRunClicked;
+                battleResultFlow.Dispose();
             }
 
             if (_battleService != null)
@@ -192,6 +215,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                     _battleService.OnEnemyCleansed -= battleEffectsView.ShowEnemyCleanse;
                 }
             }
+            
+            if (_relicService != null)
+                _relicService.RelicActivated -= OnRelicActivated;
         }
         
         private List<CardSO> BuildRegularBattleDeck()
@@ -310,6 +336,9 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (understandingView != null && _distortionService != null)
                 understandingView.Refresh(_distortionService.Understanding, DistortionService.MaxUnderstanding);
+            
+            if (relicBarView != null)
+                relicBarView.Refresh(_playerState.Relics);
         }
 
         private void RefreshButtons()
@@ -320,32 +349,30 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 endTurnButton.interactable = canEndTurn;
             }
 
-            if (battleCompletionView != null)
-                battleCompletionView.SetContinueInteractable(_battleService.IsBattleFinished);
+            if (battleResultFlow != null)
+                battleResultFlow.SetContinueInteractable(_battleService.IsBattleFinished);
         }
 
         private void HandleBattleFinishUI()
         {
             if (!_battleService.IsBattleFinished)
             {
-                _finishShown = false;
+                _understandingGainShown = false;
 
-                if (battleCompletionView != null)
-                    battleCompletionView.HideAll();
+                if (battleResultFlow != null)
+                    battleResultFlow.Refresh(false, false);
 
                 return;
             }
 
-            if (_finishShown)
-                return;
+            if (battleResultFlow != null)
+                battleResultFlow.Refresh(_battleService.IsBattleFinished, _battleService.PlayerWon);
 
-            _finishShown = true;
-            
-            if (_battleService.PlayerWon && understandingView != null && _distortionService != null) 
+            if (!_understandingGainShown && _battleService.PlayerWon && understandingView != null && _distortionService != null)
+            {
+                _understandingGainShown = true;
                 understandingView.PlayGain(_understandingBeforeBattle, _distortionService.Understanding, DistortionService.MaxUnderstanding);
-
-            if (battleCompletionView != null)
-                battleCompletionView.ShowBattleResult(_battleService.PlayerWon);
+            }
         }
 
         private void OnCardViewClicked(CardView cardView, CardSO card)
@@ -442,23 +469,41 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (!_runState.IntroBattleCompleted)
             {
-                if (showTutorialReward && tutorialRewardCard != null)
-                    ShowTutorialRewardPanel();
-                else
-                    CompleteTutorialAndGoToMap();
+                if (battleRewardFlow != null && battleRewardFlow.CanShowTutorialReward())
+                {
+                    if (battleResultFlow != null)
+                        battleResultFlow.Hide();
 
-                return;
+                    battleRewardFlow.ShowTutorialReward();
+                }
+                else
+                {
+                    CompleteTutorialAndGoToMap();
+                }
             }
 
             if (IsSelectedBossNode())
             {
-                if (battleCompletionView != null)
-                    battleCompletionView.ShowChapterComplete();
+                if (battleResultFlow != null)
+                    battleResultFlow.ShowChapterComplete();
 
                 return;
             }
 
             ShowRewardPanel();
+        }
+        
+        private void OnRelicActivated(RelicSO relic)
+        {
+            if (relicBarView != null)
+                relicBarView.PlayRelicActivated(relic);
+
+            if (battleEffectsView != null &&
+                relic != null &&
+                relic.EffectType == RelicEffectType.BlockFirstDistortionEachTurn)
+            {
+                battleEffectsView.ShowRelicBlockedDistortion();
+            }
         }
         
         private void CompleteTutorialAndGoToMap()
@@ -495,74 +540,24 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         private void ShowRewardPanel()
         {
-            if (_rewardShown)
-                return;
+            if (battleResultFlow != null)
+                battleResultFlow.Hide();
 
-            _rewardShown = true;
-
-            if (battleCompletionView != null)
-                battleCompletionView.HideAll();
-
-            if (rewardSelectionView != null)
-                rewardSelectionView.Show();
+            if (battleRewardFlow != null)
+                battleRewardFlow.ShowRegularReward();
+            else
+                GoToMapAfterReward();
         }
         
-        private void ShowTutorialRewardPanel()
+        private void OnRewardFlowCompleted()
         {
-            if (_rewardShown)
-                return;
-
-            _rewardShown = true;
-
-            if (battleCompletionView != null)
-                battleCompletionView.HideAll();
-
-            if (rewardSelectionView == null)
-            {
-                CompleteTutorialAndGoToMap();
-                return;
-            }
-
-            List<RewardItem> rewards = new()
-            {
-                new RewardItem(RewardType.Card, tutorialRewardCard)
-            };
-
-            rewardSelectionView.ShowFixed(rewards);
-        }
-
-        private void OnRewardSelected(RewardItem reward)
-        {
-            if (reward == null)
-                return;
-
-            switch (reward.Type)
-            {
-                case RewardType.Card:
-                    if (reward.Card != null)
-                        _playerState.Deck.Add(reward.Card);
-                    break;
-
-                case RewardType.Gold:
-                    _runState.AddGold(reward.Amount);
-                    break;
-
-                case RewardType.Heal:
-                    _playerState.Heal(reward.Amount);
-                    break;
-            }
-
-            GoToMapAfterReward();
-        }
-        
-        private void OnSkipRewardClicked()
-        {
-            _runState.AddSkippedReward();
             GoToMapAfterReward();
         }
 
         private void GoToMapAfterReward()
         {
+            ApplyAfterBattleRelics();
+            
             if (_mapService != null && _mapService.State != null && _mapService.State.SelectedNodeId >= 0)
             {
                 _mapService.CompleteSelectedNode();
@@ -577,6 +572,36 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             RunLifetimeScope.LoadScene(mapSceneName);
         }
         
+        private void ApplyAfterBattleRelics()
+        {
+            if (!_battleService.PlayerWon)
+                return;
+
+            int gold = GetRelicValueAtBattleStart(RelicEffectType.GainGoldAfterBattle);
+            if (gold > 0)
+                _runState.AddGold(gold);
+
+            int heal = GetRelicValueAtBattleStart(RelicEffectType.HealAfterBattle);
+            if (heal > 0)
+                _playerState.Heal(heal);
+        }
+        
+        private int GetRelicValueAtBattleStart(RelicEffectType effectType)
+        {
+            int total = 0;
+
+            foreach (RelicSO relic in _relicsAtBattleStart)
+            {
+                if (relic == null)
+                    continue;
+
+                if (relic.EffectType == effectType)
+                    total += relic.Value;
+            }
+
+            return total;
+        }
+        
         private bool IsSelectedBossNode()
         {
             if (_mapService == null || _mapService.State == null)
@@ -585,6 +610,22 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             MapNodeData selectedNode = _mapService.GetSelectedNode();
 
             return selectedNode != null && selectedNode.Type == MapNodeType.Boss;
+        }
+        
+        private void CacheRelicsAtBattleStart()
+        {
+            _relicsAtBattleStart.Clear();
+
+            if (_playerState == null || _playerState.Relics == null)
+                return;
+
+            foreach (RelicSO relic in _playerState.Relics)
+            {
+                if (relic == null)
+                    continue;
+
+                _relicsAtBattleStart.Add(relic);
+            }
         }
         
         private void OnRestartRunClicked()

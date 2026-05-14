@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RoadOfAsh.Scripts.Domain.Cards;
+using RoadOfAsh.Scripts.Domain.Relics;
 
 namespace RoadOfAsh.Scripts.Domain.Players
 {
@@ -16,6 +17,8 @@ namespace RoadOfAsh.Scripts.Domain.Players
         public List<CardSO> Deck { get; } = new();
         public List<CardSO> Hand { get; } = new();
         public List<CardSO> Discard { get; } = new();
+        
+        public List<RelicSO> Relics = new();
         
         public void Heal(int amount)
         {

@@ -11,6 +11,7 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
         void ResetUnderstanding();
         void ForceNextDistortion();
         void SetRandomDistortionEnabled(bool enabled);
+        void ResetTurnState();
  
         bool RollDistortion(CardSO card);
         PlayedCardResult Resolve(CardSO card);

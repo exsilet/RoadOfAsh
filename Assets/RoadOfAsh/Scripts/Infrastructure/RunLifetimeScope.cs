@@ -4,6 +4,7 @@ using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Domain.Shop;
 using UnityEngine;
@@ -40,6 +41,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.Register<IDistortionService, DistortionService>(Lifetime.Singleton);
             builder.Register<IBattleService, BattleService>(Lifetime.Singleton);
             builder.Register<IMapService, MapService>(Lifetime.Singleton);
+            builder.Register<RelicService>(Lifetime.Singleton).As<IRelicService>();
             builder.Register<RewardService>(Lifetime.Singleton).As<IRewardService>();
             builder.Register<ShopService>(Lifetime.Singleton).As<IShopService>();
         }

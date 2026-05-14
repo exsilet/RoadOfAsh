@@ -1,3 +1,17 @@
+- BattleRewardFlow
+- BattleResultFlow, если уже добавил
+- изменения BattleScreen
+- RelicSO / RelicPoolSO / RelicService / IRelicService
+- RelicBarView / RelicIconView
+- RewardItem с Relic
+- RewardType.Relic
+- RewardService с RelicPoolSO
+- RewardSelectionView с relicPool
+- RewardItemView с отображением реликвии
+- BattleEffectsView с ShowRelicBlockedDistortion
+- DistortionService связанный с реликвиями
+- UnderstandingView / правки PlayGain, если менял
+
 Сделано:
 - tutorial flow с подсказками
 - TutorialPanelView

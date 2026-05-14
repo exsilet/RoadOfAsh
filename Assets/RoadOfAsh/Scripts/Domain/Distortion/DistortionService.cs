@@ -1,4 +1,5 @@
 using RoadOfAsh.Scripts.Domain.Cards;
+using RoadOfAsh.Scripts.Domain.Relics;
 using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Domain.Distortion
@@ -16,6 +17,13 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
         public int Understanding { get; private set; }
         
         public bool HasForcedDistortion => _forceNext;
+        
+        private readonly IRelicService _relicService;
+        
+        public DistortionService(IRelicService relicService)
+        {
+            _relicService = relicService;
+        }
  
         public void GainUnderstanding()
         {
@@ -76,13 +84,22 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
  
         public PlayedCardResult Resolve(CardSO card)
         {
-            bool corrupted = (card.CanBeCorrupted || _forceNext)
-                             && card.CorruptedEffects.Count > 0
-                             && RollDistortion(card);
- 
+            bool shouldDistort = card != null &&
+                                 (card.CanBeCorrupted || _forceNext) &&
+                                 card.CorruptedEffects.Count > 0 &&
+                                 RollDistortion(card);
+
+            bool wasBlockedByRelic = false;
+
+            if (shouldDistort && _relicService != null && _relicService.TryBlockDistortion())
+            {
+                shouldDistort = false;
+                wasBlockedByRelic = true;
+            }
+
             _forceNext = false;
- 
-            if (corrupted)
+
+            if (shouldDistort)
             {
                 return new PlayedCardResult
                 {
@@ -91,13 +108,18 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
                     FinalCost = card.CorruptedCost > 0 ? card.CorruptedCost : card.Cost
                 };
             }
- 
+
             return new PlayedCardResult
             {
                 WasCorrupted = false,
                 FinalEffects = card.Effects,
                 FinalCost = card.Cost
             };
+        }
+        
+        public void ResetTurnState()
+        {
+            _relicService?.ResetBattleRelicState();
         }
     }
 }

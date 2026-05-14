@@ -4,6 +4,7 @@ namespace RoadOfAsh.Scripts.Domain.Rewards
     {
         Card,
         Gold,
-        Heal
+        Heal,
+        Relic
     }
 }

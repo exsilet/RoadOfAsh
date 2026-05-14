@@ -26,6 +26,10 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         [SerializeField] private GameObject playerWeakVfxPrefab;
         [SerializeField] private GameObject enemyHealVfxPrefab;
         [SerializeField] private GameObject enemyCleanseVfxPrefab;
+        
+        [Header("Relic VFX")]
+        [SerializeField] private Sprite relicBlockDistortionIcon;
+        [SerializeField] private GameObject relicBlockDistortionVfxPrefab;
 
         [Header("Animation")]
         [SerializeField] private float popupMoveY = 80f;
@@ -78,6 +82,12 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         {
             ShowPopup(enemyEffectRoot, cleanseIcon, null);
             PlayVfx(enemyEffectRoot, enemyCleanseVfxPrefab);
+        }
+        
+        public void ShowRelicBlockedDistortion()
+        {
+            ShowPopup(playerEffectRoot, relicBlockDistortionIcon, null);
+            PlayVfx(playerEffectRoot, relicBlockDistortionVfxPrefab);
         }
 
         private void ShowPopup(Transform root, Sprite icon, int? value)

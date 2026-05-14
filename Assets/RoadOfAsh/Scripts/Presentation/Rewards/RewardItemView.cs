@@ -12,6 +12,7 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
         [SerializeField] private Button button;
         [SerializeField] private Image artImage;
         [SerializeField] private TMP_Text titleText;
+
         [Header("Card Reward")]
         [SerializeField] private Transform cardRoot;
         [SerializeField] private CardView cardPrefab;
@@ -41,18 +42,26 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
         {
             ClearCardRoot();
 
+            if (_rewardItem == null)
+                return;
+
             switch (_rewardItem.Type)
             {
                 case RewardType.Card:
                     ShowCardReward();
                     break;
-
                 case RewardType.Gold:
-                    ShowSimpleReward(string.Format(goldFormat, _rewardItem.Amount), _rewardItem.Icon);
+                    ShowSimpleReward(
+                        string.Format(goldFormat, _rewardItem.Amount),
+                        _rewardItem.Icon);
                     break;
-
                 case RewardType.Heal:
-                    ShowSimpleReward(string.Format(healFormat, _rewardItem.Amount), _rewardItem.Icon);
+                    ShowSimpleReward(
+                        string.Format(healFormat, _rewardItem.Amount),
+                        _rewardItem.Icon);
+                    break;
+                case RewardType.Relic:
+                    ShowRelicReward();
                     break;
             }
         }
@@ -87,6 +96,25 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
             {
                 titleText.gameObject.SetActive(true);
                 titleText.text = title;
+            }
+        }
+
+        private void ShowRelicReward()
+        {
+            if (_rewardItem.Relic == null)
+                return;
+
+            if (artImage != null)
+            {
+                artImage.gameObject.SetActive(true);
+                artImage.sprite = _rewardItem.Relic.Icon;
+                artImage.enabled = _rewardItem.Relic.Icon != null;
+            }
+
+            if (titleText != null)
+            {
+                titleText.gameObject.SetActive(true);
+                titleText.text = _rewardItem.Relic.RelicName;
             }
         }
 

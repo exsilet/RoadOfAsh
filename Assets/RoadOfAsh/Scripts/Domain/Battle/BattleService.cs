@@ -2,6 +2,7 @@ using System;
 using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Relics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,6 +16,7 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         private readonly PlayerState _playerState;
         private readonly ICardService _cardService;
         private readonly IDistortionService _distortionService;
+        private readonly IRelicService _relicService;
 
         private EnemyState _enemy;
         private bool _finished;
@@ -36,11 +38,12 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         public bool PlayerWon => _playerWon;
         public EnemyState CurrentEnemy => _enemy;
 
-        public BattleService(PlayerState playerState, ICardService cardService, IDistortionService distortionService)
+        public BattleService(PlayerState playerState, ICardService cardService, IDistortionService distortionService, IRelicService relicService)
         {
             _playerState = playerState;
             _cardService = cardService;
             _distortionService = distortionService;
+            _relicService = relicService;
         }
 
         public void StartBattle(EnemyState enemy)
@@ -53,9 +56,14 @@ namespace RoadOfAsh.Scripts.Domain.Battle
 
             _playerState.Block = 0;
             _playerState.Energy = 3;
+            
+            ApplyRelicBlockAtTurnStart();
+            
             _playerState.Weak = 0;
             _playerState.Poison = 0;
             _enemy.Block = 0;
+            
+            _distortionService.ResetTurnState();
 
             _cardService.Draw(5);
             RollEnemyIntent();
@@ -127,6 +135,9 @@ namespace RoadOfAsh.Scripts.Domain.Battle
 
             _playerState.Block = 0;
             _playerState.Energy = 3;
+            
+            ApplyRelicBlockAtTurnStart();
+            _distortionService.ResetTurnState();
 
             _cardService.Draw(5);
             
@@ -383,6 +394,20 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             float multiplier = 1f + understanding * EnemyIntentBonusPerUnderstanding;
 
             return Mathf.Max(1, Mathf.RoundToInt(value * multiplier));
+        }
+        
+        private void ApplyRelicBlockAtTurnStart()
+        {
+            if (_relicService == null)
+                return;
+
+            int block = _relicService.GetBlockAtTurnStart();
+
+            if (block <= 0)
+                return;
+
+            _playerState.Block += block;
+            OnPlayerBlocked?.Invoke(block);
         }
     }
 }

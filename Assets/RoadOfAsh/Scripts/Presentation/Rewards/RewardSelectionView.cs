@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
         [SerializeField] private RewardItemView rewardItemPrefab;
         [SerializeField] private Button skipButton;
         [SerializeField] private RewardPoolSO rewardPool;
+        [SerializeField] private RelicPoolSO relicPool;
 
         [Header("Icons")]
         [SerializeField] private Sprite goldRewardIcon;
@@ -106,7 +108,7 @@ namespace RoadOfAsh.Scripts.Presentation.Rewards
                 return;
             }
 
-            List<RewardItem> rewards = _rewardService.GenerateBattleRewards(rewardPool);
+            List<RewardItem> rewards = _rewardService.GenerateBattleRewards(rewardPool, relicPool);
             rewards = AddIcons(rewards);
 
             foreach (RewardItem reward in rewards)
