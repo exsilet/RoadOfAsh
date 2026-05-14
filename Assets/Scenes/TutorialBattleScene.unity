@@ -214,6 +214,57 @@ MonoBehaviour:
   titleText: {fileID: 473439987}
   descriptionText: {fileID: 359909664}
   nextButton: {fileID: 2079312177}
+--- !u!1 &75162428
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 75162429}
+  - component: {fileID: 75162430}
+  m_Layer: 0
+  m_Name: BattleCardPlayFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &75162429
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75162428}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &75162430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75162428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e4a7d2e68143eeb4f3152872ada83b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardPlayAnimator: {fileID: 659799466}
+  cardResultView: {fileID: 1293953741}
+  tutorialBattleFlow: {fileID: 134572107}
 --- !u!1 &81634402
 GameObject:
   m_ObjectHideFlags: 0
@@ -1758,6 +1809,61 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 359909662}
   m_CullTransparentMesh: 1
+--- !u!1 &392272593
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 392272594}
+  - component: {fileID: 392272595}
+  m_Layer: 0
+  m_Name: BattleUiRefreshFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &392272594
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392272593}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.0000187, y: 1.0000187, z: 1.0000187}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &392272595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392272593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fe774d6689a43d5babded0549345ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handView: {fileID: 678610948}
+  battleHudView: {fileID: 1535002475}
+  battleStatusView: {fileID: 1134579987}
+  understandingView: {fileID: 2128864106}
+  relicBarView: {fileID: 1551658846}
+  battleResultFlow: {fileID: 1193326627}
+  battleTurnFlow: {fileID: 398038588}
 --- !u!1 &394661887
 GameObject:
   m_ObjectHideFlags: 0
@@ -1820,6 +1926,58 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &398038586
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 398038587}
+  - component: {fileID: 398038588}
+  m_Layer: 0
+  m_Name: BattleTurnFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &398038587
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398038586}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &398038588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398038586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7931f369e220498c90c832993a90e78d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  endTurnButton: {fileID: 1875705807}
+  handView: {fileID: 678610948}
+  cardPlayAnimator: {fileID: 659799466}
+  tutorialBattleFlow: {fileID: 134572107}
 --- !u!1 &440070854
 GameObject:
   m_ObjectHideFlags: 0
@@ -3126,6 +3284,54 @@ MonoBehaviour:
   discardMoveDuration: 0.28
   discardScale: 0.25
   discardStagger: 0.05
+--- !u!1 &669965664
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 669965665}
+  - component: {fileID: 669965666}
+  m_Layer: 0
+  m_Name: BattleAftermathFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &669965665
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669965664}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &669965666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669965664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e7b64a38230473e8b71f1100fa8f847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &671739859
 GameObject:
   m_ObjectHideFlags: 0
@@ -3564,6 +3770,62 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &744204204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 744204205}
+  - component: {fileID: 744204206}
+  m_Layer: 0
+  m_Name: BattleSetupFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &744204205
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744204204}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &744204206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744204204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca595fbd2f6c423ebfd0f2e768c1054f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingDeck: {fileID: 11400000, guid: 976d2f4dcda7b6b4bb74fb3af3e4e640, type: 2}
+  tutorialEnemy: {fileID: 11400000, guid: 7ba3400c18cb5154c8d7ce10681727a9, type: 2}
+  fallbackEnemyConfig: {fileID: 11400000, guid: d197193f73f07a94488b4d72f9e6c657, type: 2}
+  tutorialAttackCard: {fileID: 11400000, guid: 7f6774337477c8a46af4eb0d09323af2, type: 2}
+  tutorialBlockCard: {fileID: 11400000, guid: 59f22abd4f0dc3643a8a1df75da312f4, type: 2}
+  tutorialExtraCards:
+  - {fileID: 11400000, guid: 29b04a1566fe21e4e829c2ac26635d31, type: 2}
+  - {fileID: 11400000, guid: 335f48157f5455d44bcee79d0618f772, type: 2}
 --- !u!1 &762102291
 GameObject:
   m_ObjectHideFlags: 0
@@ -5923,31 +6185,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endTurnButton: {fileID: 1875705807}
-  handView: {fileID: 678610948}
-  battleHudView: {fileID: 1535002475}
-  understandingView: {fileID: 2128864106}
-  tooltipSystem: {fileID: 1849085545}
-  relicBarView: {fileID: 1551658846}
-  battleEffectsView: {fileID: 578638589}
-  battleStatusView: {fileID: 1134579987}
-  cardResultView: {fileID: 1293953741}
-  addDebugRelic: 0
-  debugRelic: {fileID: 11400000, guid: ba0208151cbc6d646b5918568a5279c8, type: 2}
+  battleHandFlow: {fileID: 2109280810}
+  battleUiRefreshFlow: {fileID: 392272595}
+  battleSetupFlow: {fileID: 744204206}
+  battleCardPlayFlow: {fileID: 75162430}
+  battleTurnFlow: {fileID: 398038588}
   tutorialBattleFlow: {fileID: 134572107}
-  startingDeck: {fileID: 11400000, guid: 976d2f4dcda7b6b4bb74fb3af3e4e640, type: 2}
-  tutorialEnemy: {fileID: 11400000, guid: 7ba3400c18cb5154c8d7ce10681727a9, type: 2}
-  fallbackEnemyConfig: {fileID: 11400000, guid: d197193f73f07a94488b4d72f9e6c657, type: 2}
+  battleFeedbackFlow: {fileID: 2045996147}
   battleRewardFlow: {fileID: 1723090142}
   battleResultFlow: {fileID: 1193326627}
-  tutorialAttackCard: {fileID: 11400000, guid: 7f6774337477c8a46af4eb0d09323af2, type: 2}
-  tutorialBlockCard: {fileID: 11400000, guid: 59f22abd4f0dc3643a8a1df75da312f4, type: 2}
-  tutorialExtraCards:
-  - {fileID: 11400000, guid: 29b04a1566fe21e4e829c2ac26635d31, type: 2}
-  - {fileID: 11400000, guid: 335f48157f5455d44bcee79d0618f772, type: 2}
-  cardPlayAnimator: {fileID: 659799466}
-  mainMenuSceneName: MainMenu
-  mapSceneName: MapScene
-  battleSceneName: BattleScene
+  battleAftermathFlow: {fileID: 669965666}
+  battleSceneFlow: {fileID: 1759862816}
 --- !u!1 &1542483830
 GameObject:
   m_ObjectHideFlags: 0
@@ -6169,7 +6417,7 @@ MonoBehaviour:
   root: {fileID: 1551658844}
   relicRoot: {fileID: 1551658845}
   relicIconPrefab: {fileID: 8311283609094013522, guid: 68f18ad049c87914a9726212c1d75c55, type: 3}
-  tooltipSystem: {fileID: 0}
+  tooltipSystem: {fileID: 1849085545}
 --- !u!114 &1551658847
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6446,6 +6694,14 @@ RectTransform:
   - {fileID: 1709933218}
   - {fileID: 347036082}
   - {fileID: 1193326626}
+  - {fileID: 669965665}
+  - {fileID: 1759862817}
+  - {fileID: 75162429}
+  - {fileID: 398038587}
+  - {fileID: 744204205}
+  - {fileID: 2045996146}
+  - {fileID: 392272594}
+  - {fileID: 2109280809}
   m_Father: {fileID: 716593275}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -7146,6 +7402,57 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1759862815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1759862817}
+  - component: {fileID: 1759862816}
+  m_Layer: 0
+  m_Name: BattleSceneFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1759862816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1759862815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5908f749b9049e8ba7272c45acf422f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainMenuSceneName: MainMenu
+  mapSceneName: MapScene
+  battleSceneName: BattleScene
+--- !u!224 &1759862817
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1759862815}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1762363433
 GameObject:
   m_ObjectHideFlags: 0
@@ -8200,6 +8507,57 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1180, y: 255.418}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &2045996145
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2045996146}
+  - component: {fileID: 2045996147}
+  m_Layer: 0
+  m_Name: BattleFeedbackFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2045996146
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045996145}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.0000187, y: 1.0000187, z: 1.0000187}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2045996147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045996145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b81c230ff81d4428ba8cb25904832691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  battleEffectsView: {fileID: 578638589}
+  cardResultView: {fileID: 1293953741}
+  relicBarView: {fileID: 1551658846}
 --- !u!1 &2074334727
 GameObject:
   m_ObjectHideFlags: 0
@@ -9008,6 +9366,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2106043958}
   m_CullTransparentMesh: 1
+--- !u!1 &2109280808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2109280809}
+  - component: {fileID: 2109280810}
+  m_Layer: 0
+  m_Name: BattleHandFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2109280809
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2109280808}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.0000187, y: 1.0000187, z: 1.0000187}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1675860851}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -0.000015258789}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2109280810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2109280808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95d50bad12a444a0a596fb6272954efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handView: {fileID: 678610948}
+  battleCardPlayFlow: {fileID: 75162430}
 --- !u!1 &2110287752
 GameObject:
   m_ObjectHideFlags: 0
