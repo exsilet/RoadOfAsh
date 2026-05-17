@@ -1,3 +1,17 @@
+- CardSO upgrade fields
+- CardUpgradeService
+- CardUpgradeSelectionView
+- CampfireView с UpgradeClicked
+- MapScreen с обработкой upgrade на костре
+- ShopPoolSO
+- ShopService с ShopPoolSO / RelicPoolSO
+- ShopItemType
+- ShopItemData с Card/Relic
+- ShopView с CloseClicked / remove card / tooltip system
+- ShopItemView с картами, реликвиями и tooltip
+- CardRemoveSelectionView
+- MapShopFlow с удалением карты, реликвиями, закрытием shop-ноды
+
 # RoadOfAsh / СКАЗКА ВРЁТ
 
 Карточный roguelite deckbuilder в мрачной славянской сказочной стилистике.

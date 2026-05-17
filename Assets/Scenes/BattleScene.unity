@@ -5392,8 +5392,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cd56abad0184c59aeed414920e681aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endTurnButton: {fileID: 1875705807}
-  battleHandFlow: {fileID: 0}
+  battleHandFlow: {fileID: 1329361638}
   battleUiRefreshFlow: {fileID: 1911564995}
   battleSetupFlow: {fileID: 587736564}
   battleCardPlayFlow: {fileID: 1845467820}

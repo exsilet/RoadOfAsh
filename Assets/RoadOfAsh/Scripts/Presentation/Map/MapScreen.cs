@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Events;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
+using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Domain.Shop;
 using RoadOfAsh.Scripts.Infrastructure;
@@ -23,6 +25,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         [SerializeField] private float campfireHealPercent = 0.3f;
         [SerializeField] private RewardSelectionView rewardSelectionView;
         [SerializeField] private EventView eventView;
+        [SerializeField] private CardUpgradeSelectionView cardUpgradeSelectionView;
         
         [SerializeField] private MapSO mapConfig;
         [SerializeField] private MapShopFlow mapShopFlow;
@@ -35,15 +38,20 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         private IShopService _shopService;
         private IMapService _mapService;
         private IRewardService _rewardService;
+        private CardUpgradeService _cardUpgradeService;
+        private IRelicService _relicService;
 
         [Inject]
-        public void Construct(IMapService mapService, PlayerState playerState, IRewardService rewardService, RunState runState, IShopService shopService)
+        public void Construct(IMapService mapService, PlayerState playerState, IRewardService rewardService, RunState runState, IShopService shopService,
+            CardUpgradeService cardUpgradeService, IRelicService relicService)
         {
             _mapService = mapService;
             _playerState = playerState;
             _rewardService = rewardService;
             _runState = runState;
             _shopService = shopService;
+            _cardUpgradeService = cardUpgradeService;
+            _relicService = relicService;
         }
 
         private void Start()
@@ -77,6 +85,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 campfireView.Hide();
                 campfireView.HealClicked += OnCampfireHealClicked;
                 campfireView.CloseClicked += OnCampfireCloseClicked;
+                campfireView.UpgradeClicked += OnCampfireUpgradeClicked;
             }
             
             if (rewardSelectionView != null)
@@ -97,7 +106,10 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 _mapService.CreateNewMap(mapConfig);
             
             if (mapShopFlow != null)
-                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService);
+            {
+                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService, _relicService);
+                mapShopFlow.ShopCompleted += OnShopCompleted;
+            }
 
             BuildMap();
         }
@@ -108,10 +120,19 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             {
                 campfireView.HealClicked -= OnCampfireHealClicked;
                 campfireView.CloseClicked -= OnCampfireCloseClicked;
+                campfireView.UpgradeClicked -= OnCampfireUpgradeClicked;
             }
             
             if (eventView != null)
                 eventView.ChoiceClicked -= OnEventChoiceClicked;
+            
+            if (mapShopFlow != null)
+                mapShopFlow.ShopCompleted -= OnShopCompleted;
+        }
+        
+        private void OnShopCompleted()
+        {
+            BuildMap();
         }
 
         private void BuildMap()
@@ -291,6 +312,43 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 eventView.Hide();
 
             _mapService.CompleteSelectedNode();
+            BuildMap();
+        }
+        
+        private void OnCampfireUpgradeClicked()
+        {
+            if (_playerState == null || _cardUpgradeService == null)
+                return;
+
+            if (!_cardUpgradeService.CanUpgradeAnyCard())
+            {
+                Debug.Log("MapScreen: no cards available for upgrade.");
+                return;
+            }
+
+            if (campfireView != null)
+                campfireView.Hide();
+
+            if (cardUpgradeSelectionView != null)
+                cardUpgradeSelectionView.Show(_playerState.Deck, OnCardSelectedForUpgrade);
+        }
+        
+        private void OnCardSelectedForUpgrade(CardSO card)
+        {
+            if (_cardUpgradeService == null)
+                return;
+
+            bool upgraded = _cardUpgradeService.TryUpgradeCard(card);
+
+            if (!upgraded)
+                return;
+
+            if (cardUpgradeSelectionView != null)
+                cardUpgradeSelectionView.Hide();
+
+            if (_mapService != null)
+                _mapService.CompleteSelectedNode();
+
             BuildMap();
         }
     }

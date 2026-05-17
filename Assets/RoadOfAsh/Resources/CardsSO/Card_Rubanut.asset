@@ -33,3 +33,5 @@ MonoBehaviour:
   CorruptedEffects:
   - Type: 0
     Value: 3
+  canBeUpgraded: 1
+  upgradedVersion: {fileID: 11400000, guid: 16b77f6bfd41a934e9b0c4d95a8c438b, type: 2}

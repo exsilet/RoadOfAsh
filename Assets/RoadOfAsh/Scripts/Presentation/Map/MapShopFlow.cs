@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using RoadOfAsh.Scripts.Domain;
 using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
-using RoadOfAsh.Scripts.Domain.Rewards;
+using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Shop;
 using UnityEngine;
 
@@ -12,53 +13,82 @@ namespace RoadOfAsh.Scripts.Presentation.Map
     public class MapShopFlow : MonoBehaviour
     {
         [SerializeField] private ShopView shopView;
-        [SerializeField] private RewardPoolSO rewardPool;
+        [SerializeField] private CardRemoveSelectionView cardRemoveSelectionView;
+        [SerializeField] private ShopPoolSO shopPool;
+        [SerializeField] private RelicPoolSO relicPool;
         [SerializeField] private int rerollCost = 15;
+        [SerializeField] private int removeCardCost = 50;
 
         private IMapService _mapService;
         private PlayerState _playerState;
         private RunState _runState;
         private IShopService _shopService;
-        private List<ShopItemData> _currentItems = new();
+        private IRelicService _relicService;
 
-        public void Initialize(IMapService mapService, PlayerState playerState, RunState runState, IShopService shopService)
+        private List<ShopItemData> _currentItems = new();
+        
+        public event Action ShopCompleted;
+
+        public void Initialize(IMapService mapService, PlayerState playerState, RunState runState, IShopService shopService, IRelicService relicService)
         {
             _mapService = mapService;
             _playerState = playerState;
             _runState = runState;
             _shopService = shopService;
+            _relicService = relicService;
 
             if (shopView != null)
-                shopView.Initialize(OnBuyClicked, OnRerollClicked);
+            {
+                shopView.Initialize(OnBuyClicked, OnRerollClicked, OnRemoveCardClicked);
+                shopView.CloseClicked += OnShopCloseClicked;
+            }
+
+            if (cardRemoveSelectionView != null)
+                cardRemoveSelectionView.Hide();
+        }
+        
+        private void OnDestroy()
+        {
+            if (shopView != null)
+                shopView.CloseClicked -= OnShopCloseClicked;
         }
 
         public void Open()
         {
-            if (_shopService == null || rewardPool == null)
-            {
-                Debug.LogError("MapShopFlow: shop service or reward pool is missing.");
-                return;
-            }
-
-            _currentItems = _shopService.GenerateShop(rewardPool);
+            _currentItems = _shopService.GenerateShop(shopPool, relicPool, _playerState.Relics);
 
             if (shopView != null)
-                shopView.Show(_currentItems, _runState.Gold);
+                shopView.Show(_currentItems, _runState.Gold, removeCardCost);
+        }
+        
+        private void OnShopCloseClicked()
+        {
+            CompleteShopNode();
         }
 
         private void OnBuyClicked(ShopItemData item)
         {
-            if (item == null || item.Card == null)
+            if (item == null)
                 return;
 
             if (!_runState.SpendGold(item.Price))
                 return;
 
-            _playerState.Deck.Add(item.Card);
-            _currentItems.Remove(item);
+            switch (item.Type)
+            {
+                case ShopItemType.Card:
+                    if (item.Card != null)
+                        _playerState.Deck.Add(item.Card);
+                    break;
 
-            if (shopView != null)
-                shopView.Refresh(_currentItems, _runState.Gold);
+                case ShopItemType.Relic:
+                    if (item.Relic != null && _relicService != null)
+                        _relicService.AddRelic(item.Relic);
+                    break;
+            }
+
+            _currentItems.Remove(item);
+            RefreshShop();
         }
 
         private void OnRerollClicked()
@@ -66,10 +96,61 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (!_runState.SpendGold(rerollCost))
                 return;
 
-            _currentItems = _shopService.GenerateShop(rewardPool);
+            _currentItems = _shopService.GenerateShop(shopPool, relicPool, _playerState.Relics);
+
+            RefreshShop();
+        }
+        
+        private void CompleteShopNode()
+        {
+            if (shopView != null)
+                shopView.Hide();
+
+            if (cardRemoveSelectionView != null)
+                cardRemoveSelectionView.Hide();
+
+            if (_mapService != null)
+                _mapService.CompleteSelectedNode();
+
+            ShopCompleted?.Invoke();
+        }
+
+        private void OnRemoveCardClicked()
+        {
+            if (_playerState == null || _playerState.Deck == null || _playerState.Deck.Count == 0)
+                return;
+
+            if (_runState == null || _runState.Gold < removeCardCost)
+                return;
 
             if (shopView != null)
-                shopView.Refresh(_currentItems, _runState.Gold);
+                shopView.Hide();
+
+            if (cardRemoveSelectionView != null)
+                cardRemoveSelectionView.Show(_playerState.Deck, OnCardSelectedForRemove);
+        }
+
+        private void OnCardSelectedForRemove(CardSO card)
+        {
+            if (card == null || _playerState == null || _runState == null)
+                return;
+
+            if (!_runState.SpendGold(removeCardCost))
+                return;
+
+            _playerState.Deck.Remove(card);
+
+            if (cardRemoveSelectionView != null)
+                cardRemoveSelectionView.Hide();
+
+            if (shopView != null)
+                shopView.Show(_currentItems, _runState.Gold, removeCardCost);
+        }
+
+        private void RefreshShop()
+        {
+            if (shopView != null)
+                shopView.Refresh(_currentItems, _runState.Gold, removeCardCost);
         }
     }
 }

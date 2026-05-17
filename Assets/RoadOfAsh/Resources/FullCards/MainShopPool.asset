@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f78a36cc63f4a2fad4bd60f16c32a8b, type: 3}
+  m_Name: MainShopPool
+  m_EditorClassIdentifier: 
+  cards:
+  - {fileID: 11400000, guid: c8f437b5e065f3b4fb51f7852d878d82, type: 2}
+  - {fileID: 11400000, guid: a4a0e4a61adb10b4abbfebf91001d73d, type: 2}
+  - {fileID: 11400000, guid: 1057a581286c5124db86481f9ac06fb1, type: 2}
+  - {fileID: 11400000, guid: 123a7974ab435f04a87ddca5292dca70, type: 2}
+  - {fileID: 11400000, guid: a26d58227728d444bba62a482dec6a0e, type: 2}
+  - {fileID: 11400000, guid: e391ffce3d5a9b94098d8c3d83049c3f, type: 2}

@@ -33,9 +33,16 @@ namespace RoadOfAsh.Scripts.Domain.Cards
         public int CorruptedCost;
 
         public List<CardEffect> CorruptedEffects = new();
+        
+        [Header("Upgrade")]
+        [SerializeField] private bool canBeUpgraded = true;
+        [SerializeField] private CardSO upgradedVersion;
     
         public CardRarity Rarity => rarity;
         public int PowerScore => powerScore;
         public bool CanAppearInRewards => canAppearInRewards;
+        public bool CanBeUpgraded => canBeUpgraded;
+        public CardSO UpgradedVersion => upgradedVersion;
+        public bool HasUpgrade => canBeUpgraded && upgradedVersion != null;
     }
 }

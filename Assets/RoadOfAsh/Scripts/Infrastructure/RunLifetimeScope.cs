@@ -44,6 +44,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.Register<RelicService>(Lifetime.Singleton).As<IRelicService>();
             builder.Register<RewardService>(Lifetime.Singleton).As<IRewardService>();
             builder.Register<ShopService>(Lifetime.Singleton).As<IShopService>();
+            builder.Register<CardUpgradeService>(Lifetime.Singleton);
         }
 
         public static void LoadScene(string sceneName)

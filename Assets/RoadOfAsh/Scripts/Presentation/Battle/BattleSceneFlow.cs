@@ -82,7 +82,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             List<CardSO> deckForBattle = isTutorialBattle
                 ? tutorialDeck
-                : new List<CardSO>(startingDeck.Cards);
+                : new List<CardSO>(_playerState.Deck);
 
             _playerState.Deck.Clear();
             _playerState.Deck.AddRange(deckForBattle);

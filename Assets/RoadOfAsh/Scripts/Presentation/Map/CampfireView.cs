@@ -11,12 +11,14 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         [SerializeField] private TMP_Text healText;
         [SerializeField] private Button healButton;
         [SerializeField] private Button closeButton;
+        [SerializeField] private Button upgradeButton;
 
         [Header("Text")]
         [SerializeField] private string healFormat = "+{0} HP";
 
         public event Action HealClicked;
         public event Action CloseClicked;
+        public event Action UpgradeClicked;
 
         private void Awake()
         {
@@ -27,6 +29,9 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             if (closeButton != null)
                 closeButton.onClick.AddListener(OnCloseClicked);
+            
+            if (upgradeButton != null)
+                upgradeButton.onClick.AddListener(OnUpgradeClicked);
         }
 
         private void OnDestroy()
@@ -36,6 +41,9 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             if (closeButton != null)
                 closeButton.onClick.RemoveListener(OnCloseClicked);
+            
+            if (upgradeButton != null)
+                upgradeButton.onClick.RemoveListener(OnUpgradeClicked);
         }
 
         public void Show(int healAmount)
@@ -45,6 +53,9 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             if (healText != null)
                 healText.text = string.Format(healFormat, healAmount);
+            
+            if (upgradeButton != null)
+                upgradeButton.gameObject.SetActive(true);
         }
 
         public void Hide()
@@ -61,6 +72,11 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         private void OnCloseClicked()
         {
             CloseClicked?.Invoke();
+        }
+        
+        private void OnUpgradeClicked()
+        {
+            UpgradeClicked?.Invoke();
         }
     }
 }
