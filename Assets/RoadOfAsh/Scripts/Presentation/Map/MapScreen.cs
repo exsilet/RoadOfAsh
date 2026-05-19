@@ -19,20 +19,18 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 {
     public class MapScreen : MonoBehaviour
     {
-        [Header("UI")]
-        [SerializeField] private RectTransform nodesRoot;
+        [Header("UI")] [SerializeField] private RectTransform nodesRoot;
         [SerializeField] private MapNodeView nodePrefab;
         [SerializeField] private CampfireView campfireView;
         [SerializeField] private float campfireHealPercent = 0.3f;
         [SerializeField] private RewardSelectionView rewardSelectionView;
         [SerializeField] private EventView eventView;
         [SerializeField] private CardUpgradeSelectionView cardUpgradeSelectionView;
-        
+
         [SerializeField] private MapSO mapConfig;
         [SerializeField] private MapShopFlow mapShopFlow;
-        
-        [Header("Scenes")]
-        [SerializeField] private string battleSceneName = "BattleScene";
+
+        [Header("Scenes")] [SerializeField] private string battleSceneName = "BattleScene";
 
         private PlayerState _playerState;
         private RunState _runState;
@@ -82,35 +80,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 Debug.LogError("MapScreen: Node Prefab is NULL.");
                 return;
             }
-            
-            if (campfireView != null)
-            {
-                campfireView.Hide();
-                campfireView.HealClicked += OnCampfireHealClicked;
-                campfireView.CloseClicked += OnCampfireCloseClicked;
-                campfireView.UpgradeClicked += OnCampfireUpgradeClicked;
-            }
-            
-            if (rewardSelectionView != null)
-            {
-                rewardSelectionView.Initialize(
-                    _rewardService,
-                    OnTreasureRewardSelected,
-                    OnTreasureRewardSkipped);
-            }
-            
-            if (eventView != null)
-            {
-                eventView.Hide();
-                eventView.ChoiceClicked += OnEventChoiceClicked;
-            }
-            
-            if (mapShopFlow != null)
-            {
-                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService, _relicService);
-                mapShopFlow.ShopCompleted += OnShopCompleted;
-            }
-            
+
             Debug.Log($"MAP START: ForceNewMap = {RunStartMode.ForceNewMap}");
             Debug.Log($"MAP START: State null = {_mapService.State == null}");
 
@@ -122,13 +92,50 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
                 RunStartMode.ForceNewMap = false;
                 _mapService.CreateNewMap(mapConfig);
+
+                Debug.Log(
+                    $"MAP START AFTER CREATE: Current = {_mapService.State.CurrentNodeId}, Selected = {_mapService.State.SelectedNodeId}, Completed = {_mapService.State.CompletedNodeIds.Count}");
             }
 
-            Debug.Log($"MAP START READY: Current = {_mapService.State.CurrentNodeId}, Selected = {_mapService.State.SelectedNodeId}, Completed = {_mapService.State.CompletedNodeIds.Count}");
+            if (campfireView != null)
+            {
+                campfireView.Hide();
+                campfireView.HealClicked += OnCampfireHealClicked;
+                campfireView.CloseClicked += OnCampfireCloseClicked;
+                campfireView.UpgradeClicked += OnCampfireUpgradeClicked;
+            }
 
+            if (rewardSelectionView != null)
+            {
+                rewardSelectionView.Initialize(
+                    _rewardService,
+                    OnTreasureRewardSelected,
+                    OnTreasureRewardSkipped);
+            }
+
+            if (eventView != null)
+            {
+                eventView.Hide();
+                eventView.ChoiceClicked += OnEventChoiceClicked;
+            }
+
+            if (mapShopFlow != null)
+            {
+                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService, _relicService);
+                mapShopFlow.ShopCompleted += OnShopCompleted;
+            }
+
+            Debug.Log(
+                $"MAP START READY: Current = {_mapService.State.CurrentNodeId}, Selected = {_mapService.State.SelectedNodeId}, Completed = {_mapService.State.CompletedNodeIds.Count}");
+
+            Debug.Log($"MAPSCREEN PLAYERSTATE HASH = {_playerState.GetHashCode()}");
+            Debug.Log($"MAPSCREEN HP = {_playerState.HP}/{_playerState.MaxHP}");
+            Debug.Log($"MAPSCREEN DECK = {_playerState.Deck.Count}");
+            Debug.Log($"MAPSCREEN RELICS = {_playerState.Relics.Count}");
+            
             BuildMap();
         }
-        
+
         private void OnDestroy()
         {
             if (campfireView != null)
@@ -137,14 +144,14 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 campfireView.CloseClicked -= OnCampfireCloseClicked;
                 campfireView.UpgradeClicked -= OnCampfireUpgradeClicked;
             }
-            
+
             if (eventView != null)
                 eventView.ChoiceClicked -= OnEventChoiceClicked;
-            
+
             if (mapShopFlow != null)
                 mapShopFlow.ShopCompleted -= OnShopCompleted;
         }
-        
+
         private void OnShopCompleted()
         {
             BuildMap();
@@ -197,7 +204,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                     break;
             }
         }
-        
+
         private void OpenCampfire()
         {
             if (_playerState == null)
@@ -211,7 +218,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (campfireView != null)
                 campfireView.Show(healAmount);
         }
-        
+
         private void OnCampfireHealClicked()
         {
             if (_playerState == null || _mapService == null)
@@ -228,19 +235,19 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             BuildMap();
         }
-        
+
         private void OnCampfireCloseClicked()
         {
             if (campfireView != null)
                 campfireView.Hide();
         }
-        
+
         private void OpenTreasure()
         {
             if (rewardSelectionView != null)
                 rewardSelectionView.Show();
         }
-        
+
         private void OnTreasureRewardSelected(RewardItem reward)
         {
             if (reward == null)
@@ -264,12 +271,12 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             CompleteTreasureNode();
         }
-        
+
         private void OnTreasureRewardSkipped()
         {
             CompleteTreasureNode();
         }
-        
+
         private void CompleteTreasureNode()
         {
             if (_mapService != null)
@@ -283,7 +290,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             BuildMap();
         }
-        
+
         private void OpenEvent(MapNodeData node)
         {
             if (node == null || node.Event == null)
@@ -295,12 +302,12 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (eventView != null)
                 eventView.Show(node.Event);
         }
-        
+
         private void OnEventChoiceClicked(EventChoiceData choice)
         {
             if (choice == null)
                 return;
-            
+
             if (choice.HpCost > 0)
                 _playerState.HP = Mathf.Max(1, _playerState.HP - choice.HpCost);
 
@@ -334,7 +341,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             _saveService?.SaveRun();
             BuildMap();
         }
-        
+
         private void OnCampfireUpgradeClicked()
         {
             if (_playerState == null || _cardUpgradeService == null)
@@ -352,7 +359,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             if (cardUpgradeSelectionView != null)
                 cardUpgradeSelectionView.Show(_playerState.Deck, OnCardSelectedForUpgrade);
         }
-        
+
         private void OnCardSelectedForUpgrade(CardSO card)
         {
             if (_cardUpgradeService == null)

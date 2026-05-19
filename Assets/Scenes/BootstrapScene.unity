@@ -184,8 +184,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 577133fe49424ec6ba87e84a41e7e14f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  introBattleSceneName: BattleScene
+  tutorialBattleSceneName: TutorialBattleScene
   mapSceneName: MapScene
+  startingDeck: {fileID: 11400000, guid: 976d2f4dcda7b6b4bb74fb3af3e4e640, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

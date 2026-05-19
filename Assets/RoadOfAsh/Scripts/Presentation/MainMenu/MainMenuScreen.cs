@@ -71,13 +71,26 @@ namespace RoadOfAsh.Scripts.Presentation.MainMenu
 
         private void StartNewRun()
         {
-            _saveService?.ClearRun();
+            Debug.Log("MAIN MENU: Start new run clicked.");
+
+            if (_playerState == null || _runState == null || _cardService == null || _distortionService == null || _saveService == null)
+            {
+                Debug.LogError("MainMenuScreen: dependencies were not injected. Check MainMenu LifetimeScope / VContainer registration.");
+                return;
+            }
+
+            _saveService.ClearRun();
 
             ResetRuntimeStateForNewRunAfterTutorial();
 
+            Debug.Log($"MAIN MENU PLAYERSTATE HASH = {_playerState.GetHashCode()}");
+            Debug.Log($"MAIN MENU HP = {_playerState.HP}/{_playerState.MaxHP}");
+            Debug.Log($"MAIN MENU DECK = {_playerState.Deck.Count}");
+            Debug.Log($"MAIN MENU RELICS = {_playerState.Relics.Count}");
+
             RunStartMode.ForceNewMap = true;
 
-            _saveService?.SaveRun();
+            Debug.Log($"MAIN MENU: ForceNewMap = {RunStartMode.ForceNewMap}");
 
             RunLifetimeScope.LoadScene(mapSceneName);
         }
@@ -86,11 +99,48 @@ namespace RoadOfAsh.Scripts.Presentation.MainMenu
         {
             if (_saveService != null && _saveService.TryLoadRun())
             {
+                EnsureDeckExistsAfterLoad();
+
                 RunLifetimeScope.LoadScene(mapSceneName);
                 return;
             }
 
             StartNewRun();
+        }
+        
+        private void EnsureDeckExistsAfterLoad()
+        {
+            if (_playerState == null)
+            {
+                Debug.LogError("MainMenuScreen: PlayerState is NULL. Cannot restore deck after load.");
+                return;
+            }
+
+            if (_playerState.Deck.Count > 0)
+                return;
+
+            if (startingDeck == null)
+            {
+                Debug.LogError("MainMenuScreen: StartingDeck is NULL. Cannot restore deck after load.");
+                return;
+            }
+
+            _playerState.Hand.Clear();
+            _playerState.Discard.Clear();
+            _playerState.Deck.Clear();
+
+            foreach (CardSO card in startingDeck.Cards)
+            {
+                if (card == null)
+                    continue;
+
+                _playerState.Deck.Add(card);
+            }
+
+            if (_cardService != null)
+                _cardService.InitializeDeck(new List<CardSO>(_playerState.Deck), true);
+
+            Debug.Log($"MainMenuScreen: deck restored after load. Deck count = {_playerState.Deck.Count}");
         }
         
         private void ResetRuntimeStateForNewRunAfterTutorial()

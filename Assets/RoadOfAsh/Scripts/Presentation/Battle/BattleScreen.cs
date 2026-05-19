@@ -156,6 +156,11 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 battleUiRefreshFlow.SetUnderstandingBeforeBattle(battleSetupFlow.UnderstandingBeforeBattle);
 
             RefreshUI();
+            
+            Debug.Log($"BATTLESCREEN PLAYERSTATE HASH = {_playerState.GetHashCode()}");
+            Debug.Log($"BATTLESCREEN HP = {_playerState.HP}/{_playerState.MaxHP}");
+            Debug.Log($"BATTLESCREEN DECK = {_playerState.Deck.Count}");
+            Debug.Log($"BATTLESCREEN RELICS = {_playerState.Relics.Count}");
         }
 
         private void OnDestroy()
