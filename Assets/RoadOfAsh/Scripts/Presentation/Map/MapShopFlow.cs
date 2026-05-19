@@ -18,6 +18,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         [SerializeField] private RelicPoolSO relicPool;
         [SerializeField] private int rerollCost = 15;
         [SerializeField] private int removeCardCost = 50;
+        [SerializeField] private int minDeckSize = 5;
 
         private IMapService _mapService;
         private PlayerState _playerState;
@@ -117,8 +118,14 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
         private void OnRemoveCardClicked()
         {
-            if (_playerState == null || _playerState.Deck == null || _playerState.Deck.Count == 0)
+            if (_playerState == null || _playerState.Deck == null)
                 return;
+
+            if (_playerState.Deck.Count <= minDeckSize)
+            {
+                Debug.Log($"Cannot remove card: minimum deck size is {minDeckSize}.");
+                return;
+            }
 
             if (_runState == null || _runState.Gold < removeCardCost)
                 return;
@@ -132,8 +139,21 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
         private void OnCardSelectedForRemove(CardSO card)
         {
-            if (card == null || _playerState == null || _runState == null)
+            if (card == null || _playerState == null || _playerState.Deck == null || _runState == null)
                 return;
+
+            if (_playerState.Deck.Count <= minDeckSize)
+            {
+                Debug.Log($"Cannot remove card: minimum deck size is {minDeckSize}.");
+
+                if (cardRemoveSelectionView != null)
+                    cardRemoveSelectionView.Hide();
+
+                if (shopView != null)
+                    shopView.Show(_currentItems, _runState.Gold, removeCardCost);
+
+                return;
+            }
 
             if (!_runState.SpendGold(removeCardCost))
                 return;

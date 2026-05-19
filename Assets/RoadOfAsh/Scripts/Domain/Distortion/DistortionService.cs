@@ -84,11 +84,9 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
  
         public PlayedCardResult Resolve(CardSO card)
         {
-            bool shouldDistort = card != null &&
-                                 (card.CanBeCorrupted || _forceNext) &&
-                                 card.CorruptedEffects.Count > 0 &&
-                                 RollDistortion(card);
-
+            bool wasForced = _forceNext;
+            bool canBeDistorted = card != null && card.CanBeCorrupted && card.CorruptedEffects.Count > 0;
+            bool shouldDistort = canBeDistorted && (wasForced || RollDistortion(card));
             bool wasBlockedByRelic = false;
 
             if (shouldDistort && _relicService != null && _relicService.TryBlockDistortion())
@@ -97,7 +95,8 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
                 wasBlockedByRelic = true;
             }
 
-            _forceNext = false;
+            if (wasForced && canBeDistorted)
+                _forceNext = false;
 
             if (shouldDistort)
             {
@@ -112,8 +111,8 @@ namespace RoadOfAsh.Scripts.Domain.Distortion
             return new PlayedCardResult
             {
                 WasCorrupted = false,
-                FinalEffects = card.Effects,
-                FinalCost = card.Cost
+                FinalEffects = card != null ? card.Effects : null,
+                FinalCost = card != null ? card.Cost : 0
             };
         }
         

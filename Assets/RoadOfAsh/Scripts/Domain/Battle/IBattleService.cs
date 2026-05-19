@@ -23,5 +23,6 @@ namespace RoadOfAsh.Scripts.Domain.Battle
         void StartBattle(EnemyState enemy);
         bool TryPlayCard(CardSO card);
         void EndPlayerTurn();
+        void RevivePlayer(int hp);
     }
 }

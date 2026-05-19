@@ -65,8 +65,9 @@ namespace RoadOfAsh.Scripts.Domain.Cards
                     ShuffleDeck();
                 }
 
-                CardSO card = _deckBuffer[0];
-                _deckBuffer.RemoveAt(0);
+                int lastIndex = _deckBuffer.Count - 1;
+                CardSO card = _deckBuffer[lastIndex];
+                _deckBuffer.RemoveAt(lastIndex);
 
                 _handBuffer.Add(card);
                 _playerState.Hand.Add(card);

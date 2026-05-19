@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using RoadOfAsh.Scripts.Infrastructure.Saves;
 
 namespace YG
 {
@@ -12,5 +13,7 @@ namespace YG
 
         public List<string> intKeys = new List<string>();
         public List<int> intValues = new List<int>();
+        
+        public RoadOfAshSaveData roadOfAshSave = new();
     }
 }

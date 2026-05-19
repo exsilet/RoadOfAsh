@@ -9,6 +9,7 @@ using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Domain.Shop;
 using RoadOfAsh.Scripts.Infrastructure;
+using RoadOfAsh.Scripts.Infrastructure.Saves;
 using RoadOfAsh.Scripts.Presentation.Rewards;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -40,10 +41,11 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         private IRewardService _rewardService;
         private CardUpgradeService _cardUpgradeService;
         private IRelicService _relicService;
+        private ISaveService _saveService;
 
         [Inject]
         public void Construct(IMapService mapService, PlayerState playerState, IRewardService rewardService, RunState runState, IShopService shopService,
-            CardUpgradeService cardUpgradeService, IRelicService relicService)
+            CardUpgradeService cardUpgradeService, IRelicService relicService, ISaveService saveService)
         {
             _mapService = mapService;
             _playerState = playerState;
@@ -52,6 +54,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             _shopService = shopService;
             _cardUpgradeService = cardUpgradeService;
             _relicService = relicService;
+            _saveService = saveService;
         }
 
         private void Start()
@@ -101,15 +104,27 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 eventView.Hide();
                 eventView.ChoiceClicked += OnEventChoiceClicked;
             }
-
-            if (_mapService.State == null)
-                _mapService.CreateNewMap(mapConfig);
             
             if (mapShopFlow != null)
             {
                 mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService, _relicService);
                 mapShopFlow.ShopCompleted += OnShopCompleted;
             }
+            
+            Debug.Log($"MAP START: ForceNewMap = {RunStartMode.ForceNewMap}");
+            Debug.Log($"MAP START: State null = {_mapService.State == null}");
+
+            bool shouldCreateNewMap = RunStartMode.ForceNewMap || _mapService.State == null;
+
+            if (shouldCreateNewMap)
+            {
+                Debug.Log("MAP START: creating new map.");
+
+                RunStartMode.ForceNewMap = false;
+                _mapService.CreateNewMap(mapConfig);
+            }
+
+            Debug.Log($"MAP START READY: Current = {_mapService.State.CurrentNodeId}, Selected = {_mapService.State.SelectedNodeId}, Completed = {_mapService.State.CompletedNodeIds.Count}");
 
             BuildMap();
         }
@@ -206,6 +221,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             _playerState.Heal(healAmount);
             _mapService.CompleteSelectedNode();
+            _saveService?.SaveRun();
 
             if (campfireView != null)
                 campfireView.Hide();
@@ -257,7 +273,10 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         private void CompleteTreasureNode()
         {
             if (_mapService != null)
+            {
                 _mapService.CompleteSelectedNode();
+                _saveService?.SaveRun();
+            }
 
             if (rewardSelectionView != null)
                 rewardSelectionView.Hide();
@@ -312,6 +331,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 eventView.Hide();
 
             _mapService.CompleteSelectedNode();
+            _saveService?.SaveRun();
             BuildMap();
         }
         
@@ -347,7 +367,10 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 cardUpgradeSelectionView.Hide();
 
             if (_mapService != null)
+            {
                 _mapService.CompleteSelectedNode();
+                _saveService?.SaveRun();
+            }
 
             BuildMap();
         }

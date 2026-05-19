@@ -7,6 +7,8 @@ using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
 using RoadOfAsh.Scripts.Domain.Shop;
+using RoadOfAsh.Scripts.Infrastructure.Ads;
+using RoadOfAsh.Scripts.Infrastructure.Saves;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
@@ -45,6 +47,9 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.Register<RewardService>(Lifetime.Singleton).As<IRewardService>();
             builder.Register<ShopService>(Lifetime.Singleton).As<IShopService>();
             builder.Register<CardUpgradeService>(Lifetime.Singleton);
+            
+            builder.Register<YandexSaveService>(Lifetime.Singleton).As<ISaveService>();
+            builder.Register<YandexAdService>(Lifetime.Singleton).As<IAdService>();
         }
 
         public static void LoadScene(string sceneName)

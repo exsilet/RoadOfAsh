@@ -5,6 +5,7 @@ using RoadOfAsh.Scripts.Domain.Distortion;
 using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Infrastructure;
+using RoadOfAsh.Scripts.Infrastructure.Saves;
 using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Presentation.Battle
@@ -21,14 +22,17 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private IMapService _mapService;
         private RunState _runState;
         private IDistortionService _distortionService;
+        private ISaveService _saveService;
 
-        public void Initialize(PlayerState playerState, ICardService cardService, IMapService mapService, RunState runState, IDistortionService distortionService)
+        public void Initialize(PlayerState playerState, ICardService cardService, IMapService mapService, RunState runState, IDistortionService distortionService,
+            ISaveService saveService)
         {
             _playerState = playerState;
             _cardService = cardService;
             _mapService = mapService;
             _runState = runState;
             _distortionService = distortionService;
+            _saveService = saveService;
         }
 
         public void CompleteTutorialAndGoToMap()
@@ -41,6 +45,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (_runState != null)
                 _runState.IntroBattleCompleted = true;
+
+            _saveService?.SaveRun();
 
             RunLifetimeScope.LoadScene(mapSceneName);
         }
@@ -63,6 +69,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                     _runState.IntroBattleCompleted = true;
             }
 
+            _saveService?.SaveRun();
+
             RunLifetimeScope.LoadScene(mapSceneName);
         }
 
@@ -80,9 +88,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             _playerState.Hand.Clear();
             _playerState.Discard.Clear();
 
-            List<CardSO> deckForBattle = isTutorialBattle
-                ? tutorialDeck
-                : new List<CardSO>(_playerState.Deck);
+            List<CardSO> deckForBattle = isTutorialBattle ? tutorialDeck : new List<CardSO>(_playerState.Deck);
 
             _playerState.Deck.Clear();
             _playerState.Deck.AddRange(deckForBattle);
@@ -94,6 +100,8 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
         public void GoToMainMenu()
         {
+            _saveService?.SaveRun();
+
             RunLifetimeScope.LoadScene(mainMenuSceneName);
         }
     }

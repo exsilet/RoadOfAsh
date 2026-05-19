@@ -149,6 +149,26 @@ namespace RoadOfAsh.Scripts.Domain.Battle
             if (!_finished)
                 OnPlayerTurnEnded?.Invoke();
         }
+        
+        public void RevivePlayer(int hp)
+        {
+            if (!_finished)
+                return;
+
+            if (_playerWon)
+                return;
+
+            _playerState.HP = Mathf.Clamp(hp, 1, _playerState.MaxHP);
+            _playerState.Block = 0;
+            _playerState.Energy = 3;
+            _playerState.Weak = 0;
+            _playerState.Poison = 0;
+
+            _finished = false;
+            _playerWon = false;
+
+            NotifyStateChanged();
+        }
 
         private PlayedCardResult BuildCardResult(CardSO card)
         {
