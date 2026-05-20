@@ -97,3 +97,7 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# PluginYG local editor saves
+Assets/PluginYourGames/Editor/SavesEditorYG2.json
+Assets/PluginYourGames/Editor/SavesEditorYG2.json.meta
