@@ -15,9 +15,7 @@ namespace RoadOfAsh.Scripts.Domain.Map
             CurrentNodeId = startNodeId;
 
             foreach (MapNodeData node in nodes)
-            {
                 Nodes.Add(new MapNodeData(node.Id, node.Type, node.Position, node.NextNodeIds, node.Enemy, node.Event));
-            }
         }
 
         public void SelectNode(int nodeId)
@@ -33,6 +31,20 @@ namespace RoadOfAsh.Scripts.Domain.Map
             CompletedNodeIds.Add(SelectedNodeId);
             CurrentNodeId = SelectedNodeId;
             SelectedNodeId = -1;
+        }
+
+        public void RestoreProgress(int currentNodeId, int selectedNodeId, IEnumerable<int> completedNodeIds)
+        {
+            CurrentNodeId = currentNodeId;
+            SelectedNodeId = selectedNodeId;
+
+            CompletedNodeIds.Clear();
+
+            if (completedNodeIds == null)
+                return;
+
+            foreach (int nodeId in completedNodeIds)
+                CompletedNodeIds.Add(nodeId);
         }
     }
 }

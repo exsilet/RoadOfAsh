@@ -12,6 +12,13 @@ namespace RoadOfAsh.Scripts.Domain.Map
             State = new MapState(mapConfig.Nodes, mapConfig.StartNodeId);
         }
 
+        public void RestoreMap(MapSO mapConfig, int currentNodeId, int selectedNodeId, IEnumerable<int> completedNodeIds)
+        {
+            CreateNewMap(mapConfig);
+
+            State.RestoreProgress(currentNodeId,selectedNodeId,completedNodeIds);
+        }
+
         public IReadOnlyList<MapNodeData> GetNodes()
         {
             EnsureState();
@@ -37,6 +44,9 @@ namespace RoadOfAsh.Scripts.Domain.Map
         public bool CanSelectNode(int nodeId)
         {
             EnsureState();
+
+            if (State.CompletedNodeIds.Contains(nodeId))
+                return false;
 
             MapNodeData currentNode = State.Nodes.FirstOrDefault(n => n.Id == State.CurrentNodeId);
 

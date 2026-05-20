@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace RoadOfAsh.Scripts.Infrastructure.Saves
 {
@@ -12,5 +13,12 @@ namespace RoadOfAsh.Scripts.Infrastructure.Saves
         public int SkippedRewards;
 
         public int PlayerHp;
+
+        public int CurrentNodeId;
+        public int SelectedNodeId = -1;
+        public List<int> CompletedNodeIds = new();
+
+        public List<string> DeckCardIds = new();
+        public List<string> RelicIds = new();
     }
 }

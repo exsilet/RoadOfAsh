@@ -27,49 +27,22 @@ public static class BattleSceneSetup
 
         var battleScreen = battleScreenRoot.gameObject.AddComponent<BattleScreen>();
 
-        var topSection = CreatePanel(
-            "TopSection",
-            battleScreenRoot,
-            new Color(0f, 0f, 0f, 0.18f),
-            new Vector2(0f, 0.70f),
-            new Vector2(1f, 1f),
-            Vector2.zero,
-            Vector2.zero);
+        var topSection = CreatePanel("TopSection",battleScreenRoot,new Color(0f, 0f, 0f, 0.18f),
+            new Vector2(0f, 0.70f),new Vector2(1f, 1f),Vector2.zero,Vector2.zero);
 
-        var middleSection = CreatePanel(
-            "MiddleSection",
-            battleScreenRoot,
-            new Color(0f, 0f, 0f, 0.10f),
-            new Vector2(0f, 0.28f),
-            new Vector2(1f, 0.70f),
-            Vector2.zero,
-            Vector2.zero);
+        var middleSection = CreatePanel("MiddleSection",battleScreenRoot,new Color(0f, 0f, 0f, 0.10f),new Vector2(0f, 0.28f),
+        new Vector2(1f, 0.70f),Vector2.zero,Vector2.zero);
 
-        var bottomSection = CreatePanel(
-            "BottomSection",
-            battleScreenRoot,
-            new Color(0f, 0f, 0f, 0.22f),
-            new Vector2(0f, 0f),
-            new Vector2(1f, 0.28f),
-            Vector2.zero,
-            Vector2.zero);
+        var bottomSection = CreatePanel("BottomSection", battleScreenRoot, new Color(0f, 0f, 0f, 0.22f), new Vector2(0f, 0f),
+            new Vector2(1f, 0.28f), Vector2.zero, Vector2.zero);
 
         BuildTop(topSection);
 
-        BuildMiddle(
-            middleSection,
-            out EnemyView enemyView,
-            out TMP_Text playerHpText,
-            out TMP_Text enemyHpText,
-            out TMP_Text playerEnergyText,
-            out TMP_Text playerBlockText
+        BuildMiddle(middleSection,out EnemyView enemyView,out TMP_Text playerHpText,out TMP_Text enemyHpText,
+            out TMP_Text playerEnergyText,out TMP_Text playerBlockText
         );
 
-        BuildBottom(
-            bottomSection,
-            out RectTransform handRoot,
-            out Button endTurnButton
-        );
+        BuildBottom(bottomSection,out RectTransform handRoot, out Button endTurnButton);
 
         var cardPrefab = AssetDatabase.LoadAssetAtPath<CardView>(CardPrefabPath);
         if (cardPrefab == null)

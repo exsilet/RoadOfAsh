@@ -157,6 +157,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects:
   - {fileID: 164033052}
+  saveContentDatabase: {fileID: 11400000, guid: 0e136828890d8534a9920a1563c16e03, type: 2}
 --- !u!4 &164033054
 Transform:
   m_ObjectHideFlags: 0

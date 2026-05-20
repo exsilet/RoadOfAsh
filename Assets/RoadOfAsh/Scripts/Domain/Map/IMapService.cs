@@ -6,6 +6,7 @@ namespace RoadOfAsh.Scripts.Domain.Map
     {
         MapState State { get; }
         void CreateNewMap(MapSO mapConfig);
+        void RestoreMap(MapSO mapConfig, int currentNodeId, int selectedNodeId, IEnumerable<int> completedNodeIds);
         IReadOnlyList<MapNodeData> GetNodes();
         MapNodeState GetNodeState(int nodeId);
         bool CanSelectNode(int nodeId);

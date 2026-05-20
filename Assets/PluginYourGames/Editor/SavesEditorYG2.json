@@ -1,0 +1,39 @@
+{
+    "stringKeys": [],
+    "stringValues": [],
+    "floatKeys": [],
+    "floatValues": [],
+    "intKeys": [],
+    "intValues": [],
+    "roadOfAshSave": {
+        "HasSave": true,
+        "IntroBattleCompleted": true,
+        "Gold": 0,
+        "SkippedRewards": 0,
+        "PlayerHp": 29,
+        "CurrentNodeId": 3,
+        "SelectedNodeId": -1,
+        "CompletedNodeIds": [
+            3
+        ],
+        "DeckCardIds": [
+            "strike_01",
+            "bark_shield_01",
+            "strike_02",
+            "bark_shield_02",
+            "dash_01"
+        ],
+        "RelicIds": [
+            "gold_tooth_01"
+        ]
+    },
+    "intExample": 5,
+    "strExample": "Hello!",
+    "boolExample": [
+        false,
+        false,
+        false,
+        false
+    ],
+    "idSave": 2
+}

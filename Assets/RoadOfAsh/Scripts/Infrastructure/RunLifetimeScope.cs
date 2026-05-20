@@ -18,6 +18,8 @@ namespace RoadOfAsh.Scripts.Infrastructure
 {
     public class RunLifetimeScope : LifetimeScope
     {
+        [Header("Save Content")]
+        [SerializeField] private SaveContentDatabaseSO saveContentDatabase;
         public static RunLifetimeScope Instance { get; private set; }
 
         protected override void Awake()
@@ -39,17 +41,23 @@ namespace RoadOfAsh.Scripts.Infrastructure
             builder.RegisterInstance(new PlayerState());
             builder.RegisterInstance(new RunState());
 
+            if (saveContentDatabase != null)
+                builder.RegisterInstance(saveContentDatabase);
+            else
+                Debug.LogError("RunLifetimeScope: SaveContentDatabaseSO is not assigned.");
+                
+            builder.Register<YandexSaveService>(Lifetime.Singleton).As<ISaveService>();
+            builder.Register<YandexAdService>(Lifetime.Singleton).As<IAdService>();
+
             builder.Register<ICardService, CardService>(Lifetime.Singleton);
             builder.Register<IDistortionService, DistortionService>(Lifetime.Singleton);
             builder.Register<IBattleService, BattleService>(Lifetime.Singleton);
             builder.Register<IMapService, MapService>(Lifetime.Singleton);
+
             builder.Register<RelicService>(Lifetime.Singleton).As<IRelicService>();
             builder.Register<RewardService>(Lifetime.Singleton).As<IRewardService>();
             builder.Register<ShopService>(Lifetime.Singleton).As<IShopService>();
             builder.Register<CardUpgradeService>(Lifetime.Singleton);
-            
-            builder.Register<YandexSaveService>(Lifetime.Singleton).As<ISaveService>();
-            builder.Register<YandexAdService>(Lifetime.Singleton).As<IAdService>();
         }
 
         public static void LoadScene(string sceneName)

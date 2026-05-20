@@ -88,13 +88,23 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             if (shouldCreateNewMap)
             {
-                Debug.Log("MAP START: creating new map.");
+                if (RunStartMode.ForceNewMap)
+                {
+                    Debug.Log("MAP START: creating new map by force.");
 
-                RunStartMode.ForceNewMap = false;
-                _mapService.CreateNewMap(mapConfig);
+                    RunStartMode.ForceNewMap = false;
+                    _mapService.CreateNewMap(mapConfig);
+                }
+                else if (_saveService != null && _saveService.TryRestoreMap(mapConfig))
+                {
+                    Debug.Log("MAP START: restored map from save.");
+                }
+                else
+                {
+                    Debug.Log("MAP START: creating new map.");
 
-                Debug.Log(
-                    $"MAP START AFTER CREATE: Current = {_mapService.State.CurrentNodeId}, Selected = {_mapService.State.SelectedNodeId}, Completed = {_mapService.State.CompletedNodeIds.Count}");
+                    _mapService.CreateNewMap(mapConfig);
+                }
             }
 
             if (campfireView != null)
