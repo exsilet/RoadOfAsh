@@ -6,6 +6,7 @@ using RoadOfAsh.Scripts.Domain.Map;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Shop;
+using RoadOfAsh.Scripts.Infrastructure.Saves;
 using UnityEngine;
 
 namespace RoadOfAsh.Scripts.Presentation.Map
@@ -25,18 +26,20 @@ namespace RoadOfAsh.Scripts.Presentation.Map
         private RunState _runState;
         private IShopService _shopService;
         private IRelicService _relicService;
+        private ISaveService _saveService;
 
         private List<ShopItemData> _currentItems = new();
         
         public event Action ShopCompleted;
 
-        public void Initialize(IMapService mapService, PlayerState playerState, RunState runState, IShopService shopService, IRelicService relicService)
+        public void Initialize(IMapService mapService, PlayerState playerState, RunState runState, IShopService shopService, IRelicService relicService, ISaveService saveService)
         {
             _mapService = mapService;
             _playerState = playerState;
             _runState = runState;
             _shopService = shopService;
             _relicService = relicService;
+            _saveService = saveService;
 
             if (shopView != null)
             {
@@ -89,6 +92,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
             }
 
             _currentItems.Remove(item);
+            _saveService?.SaveRun();
             RefreshShop();
         }
 
@@ -98,6 +102,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 return;
 
             _currentItems = _shopService.GenerateShop(shopPool, relicPool, _playerState.Relics);
+            _saveService?.SaveRun();
 
             RefreshShop();
         }
@@ -111,7 +116,10 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 cardRemoveSelectionView.Hide();
 
             if (_mapService != null)
+            {
                 _mapService.CompleteSelectedNode();
+                _saveService?.SaveRun();
+            }
 
             ShopCompleted?.Invoke();
         }
@@ -159,6 +167,7 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 return;
 
             _playerState.Deck.Remove(card);
+            _saveService?.SaveRun();
 
             if (cardRemoveSelectionView != null)
                 cardRemoveSelectionView.Hide();

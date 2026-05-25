@@ -98,7 +98,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
 
             if (battleRewardFlow != null)
             {
-                battleRewardFlow.Initialize(_playerState, _runState, _relicService, _rewardService);
+                battleRewardFlow.Initialize(_playerState, _runState, _relicService, _rewardService, _saveService);
                 battleRewardFlow.Completed += OnRewardFlowCompleted;
             }
 
@@ -156,11 +156,6 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 battleUiRefreshFlow.SetUnderstandingBeforeBattle(battleSetupFlow.UnderstandingBeforeBattle);
 
             RefreshUI();
-            
-            Debug.Log($"BATTLESCREEN PLAYERSTATE HASH = {_playerState.GetHashCode()}");
-            Debug.Log($"BATTLESCREEN HP = {_playerState.HP}/{_playerState.MaxHP}");
-            Debug.Log($"BATTLESCREEN DECK = {_playerState.Deck.Count}");
-            Debug.Log($"BATTLESCREEN RELICS = {_playerState.Relics.Count}");
         }
 
         private void OnDestroy()

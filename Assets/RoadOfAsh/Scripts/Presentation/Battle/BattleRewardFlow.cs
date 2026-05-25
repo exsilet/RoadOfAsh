@@ -5,6 +5,7 @@ using RoadOfAsh.Scripts.Domain.Cards;
 using RoadOfAsh.Scripts.Domain.Players;
 using RoadOfAsh.Scripts.Domain.Relics;
 using RoadOfAsh.Scripts.Domain.Rewards;
+using RoadOfAsh.Scripts.Infrastructure.Saves;
 using RoadOfAsh.Scripts.Presentation.Rewards;
 using UnityEngine;
 
@@ -22,30 +23,25 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
         private RunState _runState;
         private IRelicService _relicService;
         private IRewardService _rewardService;
+        private ISaveService _saveService;
 
         private bool _rewardShown;
 
         public event Action Completed;
 
-        public void Initialize(
-            PlayerState playerState,
-            RunState runState,
-            IRelicService relicService,
-            IRewardService rewardService)
+        public void Initialize(PlayerState playerState, RunState runState, IRelicService relicService, IRewardService rewardService, ISaveService saveService)
         {
             _playerState = playerState;
             _runState = runState;
             _relicService = relicService;
             _rewardService = rewardService;
+            _saveService = saveService;
 
             _rewardShown = false;
 
             if (rewardSelectionView != null)
             {
-                rewardSelectionView.Initialize(
-                    _rewardService,
-                    OnRewardSelected,
-                    OnSkipRewardClicked);
+                rewardSelectionView.Initialize(_rewardService, OnRewardSelected, OnSkipRewardClicked);
             }
         }
 
@@ -97,6 +93,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
                 return;
 
             ApplyReward(reward);
+            _saveService?.SaveRun();
             Complete();
         }
 
@@ -105,6 +102,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (_runState != null)
                 _runState.AddSkippedReward();
 
+            _saveService?.SaveRun();
             Complete();
         }
 

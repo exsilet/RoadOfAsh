@@ -13,6 +13,7 @@ namespace RoadOfAsh.Scripts.Infrastructure
         [Header("Scene Names")]
         [SerializeField] private string tutorialBattleSceneName = "TutorialBattleScene";
         [SerializeField] private string mapSceneName = "MapScene";
+        [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         [Header("Deck")]
         [SerializeField] private StarterDeckSO startingDeck;
@@ -36,14 +37,22 @@ namespace RoadOfAsh.Scripts.Infrastructure
             if (_saveService != null)
                 _saveService.TryLoadRun();
 
-            if (_runState != null && _runState.IntroBattleCompleted)
+            // if (_runState != null && _runState.IntroBattleCompleted)
+            // {
+            //     EnsureDeckExistsAfterLoad();
+            //     RunLifetimeScope.LoadScene(mapSceneName);
+            //     return;
+            // }
+            //
+            // RunLifetimeScope.LoadScene(tutorialBattleSceneName);
+            
+            if (_runState != null && !_runState.IntroBattleCompleted)
             {
-                EnsureDeckExistsAfterLoad();
-                RunLifetimeScope.LoadScene(mapSceneName);
+                RunLifetimeScope.LoadScene(tutorialBattleSceneName);
                 return;
             }
-
-            RunLifetimeScope.LoadScene(tutorialBattleSceneName);
+ 
+            RunLifetimeScope.LoadScene(mainMenuSceneName);
         }
 
         private void EnsureDeckExistsAfterLoad()

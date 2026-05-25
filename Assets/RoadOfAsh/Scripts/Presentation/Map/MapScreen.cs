@@ -81,9 +81,6 @@ namespace RoadOfAsh.Scripts.Presentation.Map
                 return;
             }
 
-            Debug.Log($"MAP START: ForceNewMap = {RunStartMode.ForceNewMap}");
-            Debug.Log($"MAP START: State null = {_mapService.State == null}");
-
             bool shouldCreateNewMap = RunStartMode.ForceNewMap || _mapService.State == null;
 
             if (shouldCreateNewMap)
@@ -131,17 +128,12 @@ namespace RoadOfAsh.Scripts.Presentation.Map
 
             if (mapShopFlow != null)
             {
-                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService, _relicService);
+                mapShopFlow.Initialize(_mapService, _playerState, _runState, _shopService, _relicService, _saveService);
                 mapShopFlow.ShopCompleted += OnShopCompleted;
             }
 
             Debug.Log(
                 $"MAP START READY: Current = {_mapService.State.CurrentNodeId}, Selected = {_mapService.State.SelectedNodeId}, Completed = {_mapService.State.CompletedNodeIds.Count}");
-
-            Debug.Log($"MAPSCREEN PLAYERSTATE HASH = {_playerState.GetHashCode()}");
-            Debug.Log($"MAPSCREEN HP = {_playerState.HP}/{_playerState.MaxHP}");
-            Debug.Log($"MAPSCREEN DECK = {_playerState.Deck.Count}");
-            Debug.Log($"MAPSCREEN RELICS = {_playerState.Relics.Count}");
             
             BuildMap();
         }

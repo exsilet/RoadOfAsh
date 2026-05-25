@@ -56,6 +56,7 @@ namespace RoadOfAsh.Scripts.Presentation.Battle
             if (_mapService != null && _mapService.State != null && _mapService.State.SelectedNodeId >= 0)
             {
                 _mapService.CompleteSelectedNode();
+                _saveService?.SaveRun();
             }
             else
             {
